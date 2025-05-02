@@ -1,0 +1,6 @@
+openai
+anthropic
+google-genai
+requests
+pandas
+ipython # For display() and HTML()
