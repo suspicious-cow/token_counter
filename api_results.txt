@@ -1,0 +1,42 @@
+--- OpenAI ---
+Output: OpenAI error: 
+
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+
+Input tokens: None
+Output tokens: None
+
+--- Gemini ---
+Output: Gemini error: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Input tokens: None
+Output tokens: None
+
+--- Anthropic ---
+Output: The theory of relativity, developed by Albert Einstein, is a fundamental concept in modern physics that describes the nature of space, time, and gravity. There are two parts to the theory: special relativity and general relativity.
+
+Special Relativity:
+- The laws of physics are the same for all observers moving at constant speeds relative to each other.
+- The speed of light is constant and independent of the motion of the source or the observer.
+- As an object approaches the speed of light, time slows down for that object (time dilation), and its length contracts (length contraction).
+- Mass and energy are equivalent, as described by the famous equation E=mc², where E is energy, m is mass, and c is the speed of light.
+
+General Relativity:
+- Gravity is not a force, but rather a consequence of the curvature of spacetime caused by the presence of mass and energy.
+- Massive objects curve spacetime, and this curvature tells matter (and light) how to move.
+- The curvature of spacetime can lead to phenomena such as the bending of light, the slowing of time near massive objects (gravitational time dilation), and the existence of black holes.
+
+In summary, the theory of relativity revolutionized our understanding of space, time, and gravity, showing that they are interconnected and can be affected by motion and the presence of mass and energy.
+Input tokens: 11
+Output tokens: 278
+
+--- Grok ---
+Output: Grok error: HTTPSConnectionPool(host='api.grok.x.ai', port=443): Max retries exceeded with url: /v1/chat/completions (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x000001801037DE80>: Failed to resolve 'api.grok.x.ai' ([Errno 11001] getaddrinfo failed)"))
+Input tokens: None
+Output tokens: None
+
