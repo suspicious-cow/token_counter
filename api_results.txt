@@ -1,118 +1,23 @@
 --- OpenAI ---
-Output: Absolutely! Here’s the theory of relativity in simple terms:
-
-**There are two main parts:**  
-1. **Special Relativity**  
-2. **General Relativity**
-
----
-
-### 1. **Special Relativity** (1905)
-
-**Key ideas:**
-- **Speed of light is the same for everyone.** No matter how fast you are moving, you’ll measure light going at about 300,000 km/s.
-- **Nothing can go faster than light.**
-- **Time and space are flexible:**  
-  - Time can move slower for someone who is moving very fast (**time dilation**).
-  - Lengths can shrink in the direction of movement (**length contraction**).
-
-**Example:**  
-If your twin leaves Earth in a very fast spaceship, when they return, **they’ll be younger than you**, because time moved slower for them.
-
----
-
-### 2. **General Relativity** (1915)
-
-**Key ideas:**
-- **Gravity isn't just a force — it’s a bending of space and time.**
-- **Anything with mass bends the space and time around it,** like a bowling ball on a rubber sheet.
-- Objects move along the curves in this bent space-time—**that’s what we experience as gravity.**
-
-**Example:**  
-The Sun bends space-time, so the Earth goes around it. This bending is also why light appears to curve near very massive objects like stars or black holes.
-
----
-
-### **In Short:**
-
-- **Space and time aren’t fixed—they can stretch and compress.**
-- **Gravity is the shape of space and time, not just a force pulling objects together.**
-
-**Relativity helps explain:**
-- Why GPS satellites need clocks that account for time running differently in space vs. Earth
-- How the universe “bends” light around heavy things (gravitational lensing)
-- What happens near black holes
-
-**In essence:**  
-**Everything’s relative,** especially space, time, and gravity!
+Output: The theory of relativity, developed by Albert Einstein, fundamentally changed our understanding of space, time, and gravity. It consists of two main parts: special relativity and general relativity. Special relativity, published in 1905, states that the laws of physics are the same for all non-accelerating observers and that the speed of light is constant regardless of the motion of the observer, leading to effects like time dilation and length contraction at high speeds. General relativity, published in 1915, extends this to include gravity, describing it not as a force but as the warping of space and time (spacetime) by mass and energy. Altogether, relativity reveals that space and time are intertwined and relative to the observer, revolutionizing our view of the universe.
 Input tokens: None
 Output tokens: None
 
 --- Gemini ---
-Output: Gemini error: module 'google.generativeai' has no attribute 'Client'
+Output: Einstein's theory of relativity, encompassing special and general relativity, fundamentally changed our understanding of space, time, gravity, and the universe. Special relativity, introduced in 1905, posits that the laws of physics are the same for all observers in uniform motion, and the speed of light in a vacuum is constant for all observers, regardless of the motion of the light source. This leads to concepts like time dilation and length contraction. General relativity, published in 1915, describes gravity not as a force but as a curvature of spacetime caused by mass and energy, affecting the motion of objects within that spacetime. In essence, objects follow the "straightest" paths (geodesics) through this curved spacetime, which we perceive as gravitational attraction.
+
 Input tokens: None
 Output tokens: None
 
 --- Anthropic ---
-Output: # Theory of Relativity in Simple Terms
+Output: # Theory of Relativity in a Nutshell
 
-Einstein's theory of relativity consists of two parts:
-
-## Special Relativity
-- Time and space are not fixed - they can stretch or contract depending on how fast you're moving
-- Nothing can travel faster than light (300,000 km/s)
-- Energy and mass are different forms of the same thing (E=mc²), which is why nuclear reactions release so much energy
-
-## General Relativity
-- Gravity isn't a force pulling objects together, but rather mass causes space itself to curve
-- Objects like planets move in straight lines through this curved space, which looks like orbits to us
-- Think of space as a trampoline - a bowling ball (the Sun) creates a depression that smaller balls (planets) naturally roll around in
-
-The theory explains why GPS satellites need time adjustments, how black holes work, and predicted gravitational waves that were confirmed in 2015.
+Einstein's theory of relativity revolutionized our understanding of space and time by establishing that they are not absolute but relative to the observer's motion. Special relativity (1905) showed that time slows and mass increases as objects approach light speed, while the speed of light remains constant for all observers, leading to the famous equation E=mc². General relativity (1915) extended these concepts by describing gravity not as a force but as a curvature of spacetime caused by mass and energy. Together, these theories explain phenomena from GPS satellite time adjustments to the bending of starlight around the sun, fundamentally changing how we understand the universe's structure.
 Input tokens: 18
-Output tokens: 203
+Output tokens: 153
 
 --- Grok ---
-Output: The theory of relativity, developed by Albert Einstein, is one of the cornerstones of modern physics. It consists of two interrelated theories: **special relativity** and **general relativity**. I'll explain both in simple terms.
-
-### 1. **Special Relativity (1905)**  
-Special relativity deals with objects moving at constant speeds, especially those moving close to the speed of light. Its key ideas are:
-
-- **The Speed of Light is Constant**: No matter how fast you're moving, the speed of light in a vacuum (about 300,000 kilometers per second or 186,000 miles per second) is always the same for everyone. This is true regardless of the motion of the source or the observer.
-  
-- **Time and Space Aren't Absolute**: Time and space are not the same for everyone. They depend on how fast you're moving relative to someone else. This leads to some surprising effects:
-  - **Time Dilation**: Time slows down for someone moving very fast compared to someone at rest. For example, a clock on a fast-moving spaceship ticks slower than one on Earth.
-  - **Length Contraction**: Objects moving very fast appear shorter in the direction of motion when observed by someone at rest.
-  
-- **E=mc²**: This famous equation shows that energy (E) and mass (m) are interchangeable. A small amount of mass can be converted into a huge amount of energy (c is the speed of light, squared). This is the principle behind nuclear reactions, like in the sun or nuclear bombs.
-
-In short, special relativity shows that the laws of physics are the same for everyone moving at a constant speed, and it connects space and time into a single concept called "spacetime."
-
----
-
-### 2. **General Relativity (1915)**  
-General relativity expands on special relativity and explains gravity in a new way. It deals with acceleration and objects in curved spacetime. Its key ideas are:
-
-- **Gravity is the Bending of Spacetime**: Instead of thinking of gravity as a force pulling objects together (like Newton did), Einstein said that massive objects, like the Earth or the Sun, bend the "fabric" of spacetime around them. Think of spacetime like a stretched-out rubber sheet. If you place a heavy ball (like a planet) on it, the sheet curves, and smaller objects roll toward the ball because of the curve. That’s how gravity works.
-
-- **Time Runs Slower in Stronger Gravity**: Near a very massive object (like a black hole), time slows down compared to areas with weaker gravity. This is called gravitational time dilation. For example, a clock on the surface of Earth ticks slightly slower than one on a satellite far away in space.
-
-- **Predictions of General Relativity**: This theory has been tested and confirmed many times. For instance:
-  - The bending of light around the Sun was observed during a solar eclipse in 1919.
-  - GPS satellites have to account for both special and general relativity to give accurate location data because time runs slightly faster in orbit (weaker gravity) than on Earth.
-
-In short, general relativity explains gravity as the result of the curvature of spacetime caused by mass and energy.
-
----
-
-### Why Does This Matter?
-- **Special relativity** helps us understand high-speed phenomena and is crucial for technologies like GPS and particle accelerators.
-- **General relativity** helps us understand the universe on a large scale, like the behavior of planets, stars, black holes, and the expansion of the universe.
-
-### A Simple Analogy
-Imagine you're on a fast-moving train (special relativity): Time and space seem different to you compared to someone standing still outside. Now imagine the train tracks are on a giant, bendy surface (general relativity): Heavy objects like the Sun create dips in the surface, and the train’s path curves around them—that’s gravity.
-
-Einstein’s theories revolutionized our understanding of the universe, showing that time, space, and gravity are deeply connected in ways we don’t notice in everyday life but are crucial for explaining the cosmos.
+Output: The theory of relativity, developed by Albert Einstein, encompasses two interrelated theories: special relativity (1905) and general relativity (1915). Special relativity applies to objects moving at constant speeds, particularly near the speed of light, and introduces the famous equation E=mc², showing that energy and mass are interchangeable. It also states that the laws of physics are the same for all non-accelerating observers and that the speed of light in a vacuum is constant, regardless of the observer's motion. General relativity expands on this, describing gravity not as a force, but as the curvature of spacetime caused by mass and energy. Massive objects, like the Earth, bend spacetime, and this curvature dictates the motion of objects, explaining phenomena like the orbiting of planets and the bending of light around stars. Together, these theories revolutionized our understanding of space, time, and gravity, fundamentally altering modern physics.
 Input tokens: 15
-Output tokens: 817
+Output tokens: 180
 
