@@ -12,7 +12,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "your-gemini-api-key")
 GROK_API_KEY = os.getenv("GROK_API_KEY", "your-grok-api-key")
 
 # Default prompts and settings
-DEFAULT_USER_PROMPT = "Give me the word 'hello'"
+DEFAULT_USER_PROMPT = "Give me the word 'hello' without any puncuation or any other characters"
 DEFAULT_SYSTEM_PROMPT = ""
 DEFAULT_NUM_TRIALS = 3
 

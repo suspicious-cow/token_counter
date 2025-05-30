@@ -3,9 +3,17 @@ Main script for running token count comparisons across multiple LLM providers.
 
 This script runs experiments with OpenAI, Gemini, Anthropic, and Grok APIs
 to compare their outputs and token counts.
+
+Usage:
+    python main.py                                    # Use defaults from config.py
+    python main.py --prompt "Your custom prompt"     # Custom user prompt
+    python main.py --trials 5                        # Custom number of trials
+    python main.py --output "results.csv"            # Custom output file
+    python main.py --prompt "Test" --trials 1        # Multiple custom options
 """
 
 import pandas as pd
+import argparse
 from config import (
     DEFAULT_USER_PROMPT, DEFAULT_SYSTEM_PROMPT, DEFAULT_NUM_TRIALS,
     CSV_OUTPUT_PATH, CSV_COLUMNS
@@ -227,13 +235,67 @@ def display_summary(df):
 
 
 def main():
-    """Main execution function."""
+    """Main function with command line argument support."""
+    parser = argparse.ArgumentParser(
+        description="Compare token usage across multiple LLM providers",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+    python main.py
+    python main.py --prompt "Explain quantum computing in one sentence"
+    python main.py --trials 5 --output "quantum_test.csv"
+    python main.py --prompt "Hello" --system "Be concise" --trials 1
+        """
+    )
+    
+    parser.add_argument(
+        '--prompt', '-p',
+        default=None,
+        help=f'User prompt (default: "{DEFAULT_USER_PROMPT}")'
+    )
+    
+    parser.add_argument(
+        '--system', '-s', 
+        default=None,
+        help=f'System prompt (default: "{DEFAULT_SYSTEM_PROMPT}")'
+    )
+    
+    parser.add_argument(
+        '--trials', '-t',
+        type=int,
+        default=DEFAULT_NUM_TRIALS,
+        help=f'Number of trials (default: {DEFAULT_NUM_TRIALS})'
+    )
+    
+    parser.add_argument(
+        '--output', '-o',
+        default=None,
+        help=f'Output CSV file (default: {CSV_OUTPUT_PATH})'
+    )
+    
+    args = parser.parse_args()
+    
+    # Use defaults from config if not specified
+    user_prompt = args.prompt if args.prompt is not None else DEFAULT_USER_PROMPT
+    system_prompt = args.system if args.system is not None else DEFAULT_SYSTEM_PROMPT
+    
+    print(f"Running token counter experiment...")
+    print(f"User prompt: {user_prompt}")
+    print(f"System prompt: {system_prompt}")
+    print(f"Trials: {args.trials}")
+    print(f"Output file: {args.output or CSV_OUTPUT_PATH}")
+    print()
+
     try:
-        # Run experiments with default settings
-        df = run_experiments()
+        # Run the experiment
+        df = run_experiments(
+            prompt=user_prompt,
+            system_prompt=system_prompt,
+            num_trials=args.trials
+        )
         
-        # Save to CSV
-        save_results_to_csv(df)
+        # Save results
+        save_results_to_csv(df, args.output)
         
         # Display summary
         display_summary(df)
@@ -243,6 +305,8 @@ def main():
     except Exception as e:
         print(f"Error running experiments: {str(e)}")
         return 1
+    
+    return 0
     
     return 0
 

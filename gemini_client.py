@@ -26,11 +26,10 @@ def process_with_gemini(prompt, system_prompt, model=None):
         client = genai.Client(api_key=GEMINI_API_KEY)
         
         # Create config with system instruction only if not empty
-        config = None
+        config = types.GenerateContentConfig()
         if system_prompt:
+            # Add system instruction if provided
             config = types.GenerateContentConfig(system_instruction=system_prompt)
-        else:
-            config = types.GenerateContentConfig()
             
         response = client.models.generate_content(
             model=model,
@@ -38,6 +37,7 @@ def process_with_gemini(prompt, system_prompt, model=None):
             contents=prompt
         )
         
+        # Use response.text to preserve the actual LLM output (including newlines for accurate token counting)
         output = getattr(response, 'text', str(response))
         usage = getattr(response, 'usage_metadata', None)
         input_tokens = usage.prompt_token_count if usage and hasattr(usage, 'prompt_token_count') else None
