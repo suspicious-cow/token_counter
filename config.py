@@ -4,6 +4,7 @@ Contains API keys, default settings, and model configurations.
 """
 
 import os
+from datetime import datetime
 
 # API Keys - Load from environment variables with fallback defaults
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "your-openai-api-key")
@@ -25,7 +26,12 @@ MODELS = {
 }
 
 # Output settings
-CSV_OUTPUT_PATH = "api_results.csv"
+def get_timestamped_filename(base_name="api_results", extension="csv"):
+    """Generate a timestamped filename for the current run."""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{base_name}_{timestamp}.{extension}"
+
+CSV_OUTPUT_PATH = "api_results.csv"  # Default fallback, usually overridden with timestamp
 CSV_COLUMNS = [
     'Run Number', 'Vendor', 'Model', 'User Prompt', 
     'System Prompt', 'Output', 'Input Tokens', 'Output Tokens'

@@ -16,7 +16,7 @@ import pandas as pd
 import argparse
 from config import (
     DEFAULT_USER_PROMPT, DEFAULT_SYSTEM_PROMPT, DEFAULT_NUM_TRIALS,
-    CSV_OUTPUT_PATH, CSV_COLUMNS
+    CSV_OUTPUT_PATH, CSV_COLUMNS, get_timestamped_filename
 )
 from openai_client import process_with_openai, get_model_name as get_openai_model
 from gemini_client import process_with_gemini, get_model_name as get_gemini_model
@@ -258,7 +258,7 @@ Examples:
         '--system', '-s', 
         default=None,
         help=f'System prompt (default: "{DEFAULT_SYSTEM_PROMPT}")'
-    )
+        )
     
     parser.add_argument(
         '--trials', '-t',
@@ -270,7 +270,7 @@ Examples:
     parser.add_argument(
         '--output', '-o',
         default=None,
-        help=f'Output CSV file (default: {CSV_OUTPUT_PATH})'
+        help='Output CSV file (default: auto-generated with timestamp)'
     )
     
     args = parser.parse_args()
@@ -279,11 +279,14 @@ Examples:
     user_prompt = args.prompt if args.prompt is not None else DEFAULT_USER_PROMPT
     system_prompt = args.system if args.system is not None else DEFAULT_SYSTEM_PROMPT
     
+    # Generate timestamped filename if no output specified
+    output_file = args.output if args.output is not None else get_timestamped_filename()
+    
     print(f"Running token counter experiment...")
     print(f"User prompt: {user_prompt}")
     print(f"System prompt: {system_prompt}")
     print(f"Trials: {args.trials}")
-    print(f"Output file: {args.output or CSV_OUTPUT_PATH}")
+    print(f"Output file: {output_file}")
     print()
 
     try:
@@ -293,9 +296,8 @@ Examples:
             system_prompt=system_prompt,
             num_trials=args.trials
         )
-        
-        # Save results
-        save_results_to_csv(df, args.output)
+          # Save results
+        save_results_to_csv(df, output_file)
         
         # Display summary
         display_summary(df)

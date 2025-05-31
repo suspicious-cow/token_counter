@@ -1,0 +1,6 @@
+Run Number,Vendor,Model,User Prompt,System Prompt,Output,Input Tokens,Output Tokens
+1,OpenAI,gpt-4o,Give me the word 'hello' without any puncuation or any other characters,,hello,23,1
+1,Gemini,gemini-2.0-flash,Give me the word 'hello' without any puncuation or any other characters,,"hello
+",16,2
+1,Anthropic,claude-3-7-sonnet-20250219,Give me the word 'hello' without any puncuation or any other characters,,hello,24,4
+1,Grok,grok-3-beta,Give me the word 'hello' without any puncuation or any other characters,,hello,22,1
