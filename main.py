@@ -129,12 +129,18 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             })
     if 'anthropic' in vendors:
         try:
-            output, in_tok, out_tok = process_with_anthropic(prompt, system_prompt)
-            input_tokens = in_tok or 0
+            output, in_tok, cached_in_tok, out_tok = process_with_anthropic(prompt, system_prompt)
+            cached_input = int(cached_in_tok) if cached_in_tok is not None else 0
+            uncached_input = (in_tok or 0) - cached_input
             output_tokens = out_tok or 0
-            input_token_cost = input_tokens * MODELS_INFO['anthropic']['input_cost_per_million'] / 1_000_000
+            # Ensure uncached_input is not negative
+            uncached_input = max(uncached_input, 0)
+            
+            # Cost calculation following Anthropic's formula
+            input_token_cost = uncached_input * MODELS_INFO['anthropic']['input_cost_per_million'] / 1_000_000
+            cached_token_cost = cached_input * MODELS_INFO['anthropic']['cached_input_cost_per_million'] / 1_000_000
             output_token_cost = output_tokens * MODELS_INFO['anthropic']['output_cost_per_million'] / 1_000_000
-            cost = input_token_cost + output_token_cost
+            cost = input_token_cost + cached_token_cost + output_token_cost
             results.append({
                 'Run Number': trial_number,
                 'Vendor': 'Anthropic',
@@ -142,11 +148,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'User Prompt': prompt,
                 'System Prompt': system_prompt,
                 'Output': output,
-                'Input Tokens': in_tok,
-                'Cached Input Tokens': 0,
+                'Input Tokens': uncached_input,
+                'Cached Input Tokens': cached_input,
                 'Output Tokens': out_tok,
                 'Input Token Cost (USD)': round(input_token_cost, 6),
-                'Cached Token Cost (USD)': 0.0,
+                'Cached Token Cost (USD)': round(cached_token_cost, 6),
                 'Output Token Cost (USD)': round(output_token_cost, 6),
                 'Cost (USD)': round(cost, 6)
             })

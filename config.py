@@ -43,7 +43,9 @@ MODELS_INFO = {
     "anthropic": {
         "model": "claude-3-7-sonnet-20250219",
         "input_cost_per_million": 3.00,    # USD per 1M input tokens
+        "cached_input_cost_per_million": 0.30, # USD per 1M cached input tokens (90% discount for cache reads)
         "output_cost_per_million": 15.00   # USD per 1M output tokens
+        # Note: Anthropic charges 25% premium for cache writes, 90% discount for cache reads
     },
     "grok": {
         "model": "grok-3-beta",
@@ -74,7 +76,7 @@ CSV_COLUMNS = [
     'Input Token Cost (USD)', 'Cached Token Cost (USD)', 'Output Token Cost (USD)', 'Cost (USD)'
 ]
 
-# Note: For providers with caching (OpenAI, Gemini):
+# Note: For providers with caching (OpenAI, Gemini, Anthropic):
 # - "Input Tokens" = regular/uncached input tokens only (I_reg)
 # - "Cached Input Tokens" = tokens retrieved from cache (I_cache) 
 # - Total input tokens = Input Tokens + Cached Input Tokens

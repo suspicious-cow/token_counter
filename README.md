@@ -112,7 +112,7 @@ The system calculates costs for each API call using current pricing information 
 |----------|------------|-------------------|-------------|
 | OpenAI GPT-4.1 | $2.00 | $0.50 | $8.00 |
 | Gemini 2.5 Flash | $0.30 | $0.075 | $2.50 |
-| Anthropic Claude-3.5 Sonnet | $3.00 | N/A | $15.00 |
+| Anthropic Claude-3.7 Sonnet | $3.00 | $0.30 | $15.00 |
 | Grok 3 Beta | $0.00 | N/A | $0.00 |
 
 ### Gemini 2.5 Flash: Controllable Reasoning
@@ -137,10 +137,10 @@ This allows you to balance between:
 
 ### Cost Calculation Details
 
-- **OpenAI**: Supports input token caching with 50% discount on cached tokens
+- **OpenAI**: Supports input token caching with 75% discount on cached tokens
 - **Gemini**: Supports context caching with 75% discount on cached tokens (both implicit and explicit caching)
-- **Other Providers**: Standard input/output token pricing (no cache discount exposed)
-- **Grok**: Currently set to $0.00 (update `config.py` when pricing is available)
+- **Anthropic**: Supports prompt caching with 90% discount on cached tokens (cache reads)
+- **Grok**: Standard input/output token pricing (no cache discount exposed)
 - **All costs** are calculated per API call and aggregated in the experiment summary
 
 ### Gemini Context Caching
@@ -154,15 +154,30 @@ Gemini 2.5 Flash supports context caching with significant cost savings:
   - **Explicit**: Manual caching via API for large documents/media
 - **TTL**: Default 1 hour (customizable)
 
+### Anthropic Prompt Caching
+
+Anthropic's Claude models support prompt caching with the highest discount rates:
+
+- **Cache Discount**: 90% off regular input token pricing for cache reads
+- **Cache Charges**: 25% premium for initial cache writes (not tracked separately in this tool)
+- **Minimum Threshold**: 1,024 tokens for Claude Sonnet models
+- **Cache Expiration**: ~5 minutes after last access
+- **API Fields**: 
+  - `cache_creation_input_tokens`: Tokens written to cache
+  - `cache_read_input_tokens`: Tokens read from cache (90% discount)
+  - `input_tokens`: Regular uncached tokens (full price)
+
+**Note**: This tool combines `cache_creation_input_tokens` and `cache_read_input_tokens` into "Cached Input Tokens" for consistency with other providers.
+
 ## Token Counting Implementation
 
 ### ✅ Official API Token Counts (Text Only)
 
 All clients use official token counts from each provider's API response for **text-based interactions only**:
 
-- **OpenAI**: `response.usage.prompt_tokens` / `response.usage.completion_tokens`
-- **Anthropic**: `message.usage.input_tokens` / `message.usage.output_tokens`
-- **Gemini**: `response.usage_metadata.prompt_token_count` / `response.usage_metadata.candidates_token_count`
+- **OpenAI**: `response.usage.prompt_tokens` / `response.usage.completion_tokens` + caching details
+- **Anthropic**: `message.usage.input_tokens` / `message.usage.output_tokens` + caching details
+- **Gemini**: `response.usage_metadata.prompt_token_count` / `response.usage_metadata.candidates_token_count` + caching details
 - **Grok**: `completion.usage.prompt_tokens` / `completion.usage.completion_tokens`
 
 **Note**: This tool does not analyze multimodal features (images, audio, vision) - only text input and text output token usage.
