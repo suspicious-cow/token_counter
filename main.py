@@ -266,6 +266,7 @@ def display_summary(df, log_failed_path=None):
     print("\nToken usage by vendor:")
     token_summary = df.groupby('Vendor').agg({
         'Input Tokens': ['mean', 'sum'],
+        'Cached Input Tokens': ['mean', 'sum'],
         'Output Tokens': ['mean', 'sum']
     }).round(2)
     print(token_summary)
