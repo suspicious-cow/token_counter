@@ -6,8 +6,10 @@ A modular Python system for comparing token usage and outputs across multiple La
 
 - **Multi-Provider Support**: OpenAI GPT-4, Google Gemini, Anthropic Claude, and xAI Grok
 - **Official Token Counts**: Uses each provider's official API token counts (not estimates)
+- **Cost Calculations**: Detailed cost breakdown using current pricing for each provider
 - **Centralized Configuration**: Easy prompt and model customization in `config.py`
 - **CSV Export**: Raw data output for analysis and visualization
+- **Experiment Summaries**: Comprehensive reports with cost analysis and failed call tracking
 - **Modular Architecture**: Separate client modules for each provider
 - **Error Handling**: Robust error handling and reporting
 
@@ -83,15 +85,39 @@ Edit `config.py` to customize:
 ## File Structure
 
 ```text
-├── config.py              # Centralized configuration
+├── config.py              # Centralized configuration and pricing info
 ├── main.py                # Main execution script with CLI arguments
 ├── openai_client.py       # OpenAI API client
 ├── gemini_client.py       # Google Gemini API client
 ├── anthropic_client.py    # Anthropic Claude API client
 ├── grok_client.py         # xAI Grok API client
 ├── requirements.txt       # Python dependencies
-└── README.md             # This file
+├── README.md             # This file
+└── outputs/              # Generated experiment results
+    ├── api_raw_*.csv          # Raw data with token counts and costs
+    ├── experiment_summary_*.txt # Statistical summaries
+    └── *_failed.log           # Failed API call details (if any)
 ```
+
+## Cost Calculations
+
+The system calculates costs for each API call using current pricing information stored in `config.py`:
+
+### Current Pricing (USD per 1M tokens)
+
+| Provider | Input Cost | Cached Input Cost | Output Cost |
+|----------|------------|-------------------|-------------|
+| OpenAI GPT-4o | $2.50 | $1.25 | $10.00 |
+| Gemini 2.0 Flash | $0.35 | N/A | $1.05 |
+| Anthropic Claude-3.5 Sonnet | $3.00 | N/A | $15.00 |
+| Grok 3 Beta | $0.00 | N/A | $0.00 |
+
+### Cost Calculation Details
+
+- **OpenAI**: Supports input token caching with 50% discount on cached tokens
+- **Other Providers**: Standard input/output token pricing (no cache discount exposed)
+- **Grok**: Currently set to $0.00 (update `config.py` when pricing is available)
+- **All costs** are calculated per API call and aggregated in the experiment summary
 
 ## Token Counting Implementation
 
@@ -173,7 +199,7 @@ For more details, see [OpenAI Pricing](https://openai.com/pricing) and [communit
 
 ## Output Format
 
-Results are saved to `api_results.csv` with columns:
+Results are saved to timestamped CSV files in the `outputs/` folder with columns:
 
 - `Run Number`: Trial identifier
 - `Vendor`: LLM provider (OpenAI, Gemini, Anthropic, Grok)
@@ -182,7 +208,48 @@ Results are saved to `api_results.csv` with columns:
 - `System Prompt`: System instructions (if any)
 - `Output`: Actual LLM response (preserved exactly as returned)
 - `Input Tokens`: Tokens used for input
+- `Cached Input Tokens`: Input tokens served from cache (OpenAI only)
 - `Output Tokens`: Tokens generated in response
+- `Input Token Cost (USD)`: Cost for uncached input tokens
+- `Cached Token Cost (USD)`: Cost for cached input tokens (OpenAI only)
+- `Output Token Cost (USD)`: Cost for output tokens
+- `Cost (USD)`: Total cost for the API call
+
+## Experiment Summary
+
+Each experiment generates multiple output files:
+
+1. **Raw Data CSV**: `api_raw_YYYYMMDD_HHMMSS_TZ.csv` - Complete detailed results
+2. **Experiment Summary**: `experiment_summary_YYYYMMDD_HHMMSS_TZ.txt` - Statistical overview
+3. **Failed Calls Log**: `api_raw_YYYYMMDD_HHMMSS_TZ_failed.log` - Details of any failed API calls
+
+### Sample Experiment Summary
+
+```text
+==================================================
+EXPERIMENT SUMMARY
+==================================================
+Total API calls: 8
+Successful calls: 8
+Failed calls: 0
+
+No failed calls by vendor.
+
+Token usage by vendor:
+          Input Tokens     Cached Input Tokens     Output Tokens       Cost (USD)
+                  mean sum                mean sum          mean   sum       mean       sum
+Vendor
+Anthropic         24.0  48                 0.0   0           4.0     8   0.000132  0.000264
+Gemini            16.0  32                 0.0   0           2.0     4   0.000008  0.000016
+Grok              22.0  44                 0.0   0           1.0     2   0.000000  0.000000
+OpenAI            23.0  46                 0.0   0           1.0     2   0.000068  0.000136
+
+Sample outputs (first trial):
+  OpenAI: Hello
+  Gemini: hello
+  Anthropic: hello
+  Grok: hello
+```
 
 ## Customization
 
@@ -233,7 +300,16 @@ Be aware of rate limits for each provider:
 2. **Rate Limiting**: Reduce `DEFAULT_NUM_TRIALS` or add delays
 3. **Model Availability**: Some models may require specific API access levels
 4. **CSV Display**: Newline characters may appear as formatting artifacts in viewers
-5. **Vendor-Specific Failures**: Check the generated log file in `outputs/` for details on failed calls by vendor.
+5. **Failed API Calls**: Check the generated `*_failed.log` file in `outputs/` for detailed error information
+6. **Cost Calculations**: Pricing in `config.py` may need manual updates as providers change their rates
+
+### Output Files
+
+All experiment results are saved to timestamped files in the `outputs/` folder:
+
+- Raw data CSV files for analysis
+- Human-readable experiment summaries
+- Failed call logs for troubleshooting
 
 ### Debug Mode
 

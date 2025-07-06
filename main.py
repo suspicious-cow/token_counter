@@ -291,7 +291,7 @@ def display_summary(df, log_failed_path=None):
     
     # Basic stats
     total_calls = len(df)
-    successful_calls = len(df[~df['Output'].str.contains('error', case=False, na=False)])
+    successful_calls = len(df[~df['Output'].str.startswith('Error:', na=False)])
     failed_calls = total_calls - successful_calls
     
     print(f"Total API calls: {total_calls}")
@@ -299,7 +299,7 @@ def display_summary(df, log_failed_path=None):
     print(f"Failed calls: {failed_calls}")
     
     # Failed calls by vendor
-    failed = df[df['Output'].str.contains('error', case=False, na=False)]
+    failed = df[df['Output'].str.startswith('Error:', na=False)]
     if not failed.empty:
         print("\nFailed calls by vendor:")
         failed_counts = failed['Vendor'].value_counts()

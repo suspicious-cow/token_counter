@@ -75,7 +75,8 @@ def get_timestamped_filename(base_name="api_results", extension="csv"):
 CSV_OUTPUT_PATH = "api_results.csv"  # Default fallback, usually overridden with timestamp
 CSV_COLUMNS = [
     'Run Number', 'Vendor', 'Model', 'User Prompt', 
-    'System Prompt', 'Output', 'Input Tokens', 'Cached Input Tokens', 'Output Tokens'
+    'System Prompt', 'Output', 'Input Tokens', 'Cached Input Tokens', 'Output Tokens',
+    'Input Token Cost (USD)', 'Cached Token Cost (USD)', 'Output Token Cost (USD)', 'Cost (USD)'
 ]
 
 # Anthropic specific settings
