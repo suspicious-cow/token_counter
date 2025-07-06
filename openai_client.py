@@ -16,7 +16,7 @@ def process_with_openai(prompt, system_prompt, model=None):
         model (str): The model to use (defaults to config setting)
     
     Returns:
-        tuple: (output, input_tokens, output_tokens)
+        tuple: (output, input_tokens, cached_input_tokens, output_tokens)
     """
     if model is None:
         model = MODELS["openai"]
@@ -38,9 +38,17 @@ def process_with_openai(prompt, system_prompt, model=None):
         input_tokens = getattr(response.usage, 'prompt_tokens', None)
         output_tokens = getattr(response.usage, 'completion_tokens', None)
         
-        return output, input_tokens, output_tokens
+        # Get cached input tokens if available (OpenAI only)
+        cached_input_tokens = None
+        prompt_tokens_details = getattr(response.usage, 'prompt_tokens_details', None)
+        if prompt_tokens_details:
+            if isinstance(prompt_tokens_details, dict):
+                cached_input_tokens = prompt_tokens_details.get('cached_tokens', None)
+            else:
+                cached_input_tokens = getattr(prompt_tokens_details, 'cached_tokens', None)
+        return output, input_tokens, cached_input_tokens, output_tokens
     except Exception as e:
-        return f"OpenAI ChatCompletions error: {str(e)}", None, None
+        return f"OpenAI ChatCompletions error: {str(e)}", None, None, None
 
 
 def get_model_name():
