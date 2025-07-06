@@ -62,14 +62,15 @@ TIMEZONE = os.getenv("TOKEN_COUNTER_TIMEZONE", "America/Chicago")  # Change to y
 
 # Output settings
 def get_timestamped_filename(base_name="api_results", extension="csv"):
-    """Generate a timestamped filename for the current run in the outputs/ folder, using 24-hour time and configured timezone."""
+    """Generate a timestamped filename for the current run in the outputs/ folder, using 24-hour time and configured timezone, with timezone abbreviation in the filename."""
     try:
         tz = ZoneInfo(TIMEZONE)
     except Exception:
-        tz = None  # Fallback to naive datetime if timezone fails
+        tz = None
     now = datetime.now(tz) if tz else datetime.now()
-    timestamp = now.strftime("%Y%m%d_%H%M%S")  # 24-hour time
-    return os.path.join("outputs", f"{base_name}_{timestamp}.{extension}")
+    timestamp = now.strftime("%Y%m%d_%H%M%S")
+    tz_abbr = now.strftime('%Z') if tz else "local"
+    return os.path.join("outputs", f"{base_name}_{timestamp}_{tz_abbr}.{extension}")
 
 CSV_OUTPUT_PATH = "api_results.csv"  # Default fallback, usually overridden with timestamp
 CSV_COLUMNS = [
