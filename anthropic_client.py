@@ -3,7 +3,7 @@ Anthropic client module for token counting.
 """
 
 import anthropic
-from config import ANTHROPIC_API_KEY, MODELS, ANTHROPIC_MAX_TOKENS
+from config import ANTHROPIC_API_KEY, MODELS_INFO, ANTHROPIC_MAX_TOKENS
 
 
 def process_with_anthropic(prompt, system_prompt, model=None):
@@ -19,7 +19,7 @@ def process_with_anthropic(prompt, system_prompt, model=None):
         tuple: (output, input_tokens, output_tokens)
     """
     if model is None:
-        model = MODELS["anthropic"]
+        model = MODELS_INFO["anthropic"]["model"]
     
     try:
         client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -46,4 +46,4 @@ def process_with_anthropic(prompt, system_prompt, model=None):
 
 def get_model_name():
     """Get the default model name for Anthropic."""
-    return MODELS["anthropic"]
+    return MODELS_INFO["anthropic"]["model"]

@@ -3,7 +3,7 @@ Grok client module for token counting.
 """
 
 from openai import OpenAI
-from config import GROK_API_KEY, MODELS, GROK_BASE_URL
+from config import GROK_API_KEY, MODELS_INFO, GROK_BASE_URL
 
 
 def process_with_grok(prompt, system_prompt, model=None):
@@ -19,7 +19,7 @@ def process_with_grok(prompt, system_prompt, model=None):
         tuple: (output, input_tokens, output_tokens)
     """
     if model is None:
-        model = MODELS["grok"]
+        model = MODELS_INFO["grok"]["model"]
     
     try:
         client = OpenAI(
@@ -48,4 +48,4 @@ def process_with_grok(prompt, system_prompt, model=None):
 
 def get_model_name():
     """Get the default model name for Grok."""
-    return MODELS["grok"]
+    return MODELS_INFO["grok"]["model"]

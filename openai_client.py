@@ -3,7 +3,7 @@ OpenAI client module for token counting.
 """
 
 from openai import OpenAI
-from config import OPENAI_API_KEY, MODELS
+from config import OPENAI_API_KEY, MODELS_INFO
 
 
 def process_with_openai(prompt, system_prompt, model=None):
@@ -19,7 +19,7 @@ def process_with_openai(prompt, system_prompt, model=None):
         tuple: (output, input_tokens, cached_input_tokens, output_tokens)
     """
     if model is None:
-        model = MODELS["openai"]
+        model = MODELS_INFO["openai"]["model"]
     
     try:
         client = OpenAI(api_key=OPENAI_API_KEY)
@@ -53,4 +53,4 @@ def process_with_openai(prompt, system_prompt, model=None):
 
 def get_model_name():
     """Get the default model name for OpenAI."""
-    return MODELS["openai"]
+    return MODELS_INFO["openai"]["model"]

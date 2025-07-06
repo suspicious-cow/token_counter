@@ -23,6 +23,7 @@ DEFAULT_SYSTEM_PROMPT = ""
 DEFAULT_NUM_TRIALS = 3
 
 # Model and pricing information for cost calculations (USD per 1M tokens)
+# This is the single source of truth for both model names and pricing
 # Unfortunately, most providers don't offer pricing through the API so updating cost is a manual process
 MODELS_INFO = {
     "openai": {
@@ -47,14 +48,6 @@ MODELS_INFO = {
         "input_cost_per_million": 0.00,    # Set to actual if available
         "output_cost_per_million": 0.00    # Set to actual if available
     }
-}
-
-# Model configurations
-MODELS = {
-    "openai": "gpt-4.1",
-    "gemini": "gemini-2.5-flash", 
-    "anthropic": "claude-3-7-sonnet-20250219",
-    "grok": "grok-3-beta"
 }
 
 # Timezone configuration (default: Central Time)

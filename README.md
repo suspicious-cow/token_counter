@@ -284,14 +284,19 @@ DEFAULT_SYSTEM_PROMPT = "Your system instructions"
 
 ### Changing Models
 
-Edit `config.py`:
+Edit `config.py` and update the model names in `MODELS_INFO`:
 
 ```python
-MODELS = {
-    "openai": "gpt-4o",
-    "gemini": "gemini-2.0-flash",
-    "anthropic": "claude-3-7-sonnet-20250219",
-    "grok": "grok-3-beta"
+MODELS_INFO = {
+    "openai": {
+        "model": "gpt-4.1",  # Change this to the desired OpenAI model
+        # ... pricing info
+    },
+    "gemini": {
+        "model": "gemini-2.5-flash",  # Change this to the desired Gemini model
+        # ... pricing info
+    }
+    # ... etc
 }
 ```
 

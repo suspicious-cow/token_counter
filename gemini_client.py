@@ -9,7 +9,7 @@ Features:
 
 from google import genai
 from google.genai import types
-from config import GEMINI_API_KEY, MODELS, GEMINI_THINKING_BUDGET
+from config import GEMINI_API_KEY, MODELS_INFO, GEMINI_THINKING_BUDGET
 
 
 def process_with_gemini(prompt, system_prompt, model=None):
@@ -25,7 +25,7 @@ def process_with_gemini(prompt, system_prompt, model=None):
         tuple: (output, input_tokens, output_tokens)
     """
     if model is None:
-        model = MODELS["gemini"]
+        model = MODELS_INFO["gemini"]["model"]
     
     try:
         client = genai.Client(api_key=GEMINI_API_KEY)
@@ -66,4 +66,4 @@ def process_with_gemini(prompt, system_prompt, model=None):
 
 def get_model_name():
     """Get the default model name for Gemini."""
-    return MODELS["gemini"]
+    return MODELS_INFO["gemini"]["model"]
