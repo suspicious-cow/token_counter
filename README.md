@@ -57,6 +57,20 @@ python main.py --prompt "Hello world" --system "Be concise" --trials 1
 python main.py --help
 ```
 
+### Run for Specific Vendors Only
+
+You can run experiments for just one or more vendors using the `--vendors` argument (comma-separated):
+
+```bash
+# Only Gemini, 20 runs
+python main.py --vendors gemini --trials 20
+
+# Only OpenAI and Grok
+python main.py --vendors openai,grok --trials 5
+```
+
+If you don't specify `--vendors`, all providers are used by default.
+
 ### Configuration
 
 Edit `config.py` to customize:
@@ -179,6 +193,7 @@ Be aware of rate limits for each provider:
 2. **Rate Limiting**: Reduce `DEFAULT_NUM_TRIALS` or add delays
 3. **Model Availability**: Some models may require specific API access levels
 4. **CSV Display**: Newline characters may appear as formatting artifacts in viewers
+5. **Vendor-Specific Failures**: Check the generated log file in `outputs/` for details on failed calls by vendor.
 
 ### Debug Mode
 
