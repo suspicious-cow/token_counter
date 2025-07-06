@@ -24,131 +24,129 @@ from anthropic_client import process_with_anthropic, get_model_name as get_anthr
 from grok_client import process_with_grok, get_model_name as get_grok_model
 
 
-def run_single_trial(prompt, system_prompt, trial_number):
+def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
     """
-    Run a single trial across all LLM providers.
+    Run a single trial across selected LLM providers.
     
     Args:
         prompt (str): The user prompt
         system_prompt (str): The system prompt
         trial_number (int): The trial number
+        vendors (list or None): List of vendors to run (default: all)
     
     Returns:
         list: List of result dictionaries
     """
     results = []
-    
-    # Test OpenAI
-    try:
-        output, in_tok, out_tok = process_with_openai(prompt, system_prompt)
-        results.append({
-            'Run Number': trial_number,
-            'Vendor': 'OpenAI',
-            'Model': get_openai_model(),
-            'User Prompt': prompt,
-            'System Prompt': system_prompt,
-            'Output': output,
-            'Input Tokens': in_tok,
-            'Output Tokens': out_tok
-        })
-    except Exception as e:
-        results.append({
-            'Run Number': trial_number,
-            'Vendor': 'OpenAI',
-            'Model': get_openai_model(),
-            'User Prompt': prompt,
-            'System Prompt': system_prompt,
-            'Output': f"Error: {str(e)}",
-            'Input Tokens': None,
-            'Output Tokens': None
-        })
-    
-    # Test Gemini
-    try:
-        output, in_tok, out_tok = process_with_gemini(prompt, system_prompt)
-        results.append({
-            'Run Number': trial_number,
-            'Vendor': 'Gemini',
-            'Model': get_gemini_model(),
-            'User Prompt': prompt,
-            'System Prompt': system_prompt,
-            'Output': output,
-            'Input Tokens': in_tok,
-            'Output Tokens': out_tok
-        })
-    except Exception as e:
-        results.append({
-            'Run Number': trial_number,
-            'Vendor': 'Gemini',
-            'Model': get_gemini_model(),
-            'User Prompt': prompt,
-            'System Prompt': system_prompt,
-            'Output': f"Error: {str(e)}",
-            'Input Tokens': None,
-            'Output Tokens': None
-        })
-    
-    # Test Anthropic
-    try:
-        output, in_tok, out_tok = process_with_anthropic(prompt, system_prompt)
-        results.append({
-            'Run Number': trial_number,
-            'Vendor': 'Anthropic',
-            'Model': get_anthropic_model(),
-            'User Prompt': prompt,
-            'System Prompt': system_prompt,
-            'Output': output,
-            'Input Tokens': in_tok,
-            'Output Tokens': out_tok
-        })
-    except Exception as e:
-        results.append({
-            'Run Number': trial_number,
-            'Vendor': 'Anthropic',
-            'Model': get_anthropic_model(),
-            'User Prompt': prompt,
-            'System Prompt': system_prompt,
-            'Output': f"Error: {str(e)}",
-            'Input Tokens': None,
-            'Output Tokens': None
-        })
-    
-    # Test Grok
-    try:
-        output, in_tok, out_tok = process_with_grok(prompt, system_prompt)
-        results.append({
-            'Run Number': trial_number,
-            'Vendor': 'Grok',
-            'Model': get_grok_model(),
-            'User Prompt': prompt,
-            'System Prompt': system_prompt,
-            'Output': output,
-            'Input Tokens': in_tok,
-            'Output Tokens': out_tok
-        })
-    except Exception as e:
-        results.append({
-            'Run Number': trial_number,
-            'Vendor': 'Grok',
-            'Model': get_grok_model(),
-            'User Prompt': prompt,
-            'System Prompt': system_prompt,
-            'Output': f"Error: {str(e)}",
-            'Input Tokens': None,
-            'Output Tokens': None
-        })
-    
+    vendors = [v.lower() for v in vendors] if vendors else ['openai', 'gemini', 'anthropic', 'grok']
+    if 'openai' in vendors:
+        try:
+            output, in_tok, out_tok = process_with_openai(prompt, system_prompt)
+            results.append({
+                'Run Number': trial_number,
+                'Vendor': 'OpenAI',
+                'Model': get_openai_model(),
+                'User Prompt': prompt,
+                'System Prompt': system_prompt,
+                'Output': output,
+                'Input Tokens': in_tok,
+                'Output Tokens': out_tok
+            })
+        except Exception as e:
+            results.append({
+                'Run Number': trial_number,
+                'Vendor': 'OpenAI',
+                'Model': get_openai_model(),
+                'User Prompt': prompt,
+                'System Prompt': system_prompt,
+                'Output': f"Error: {str(e)}",
+                'Input Tokens': None,
+                'Output Tokens': None
+            })
+    if 'gemini' in vendors:
+        try:
+            output, in_tok, out_tok = process_with_gemini(prompt, system_prompt)
+            results.append({
+                'Run Number': trial_number,
+                'Vendor': 'Gemini',
+                'Model': get_gemini_model(),
+                'User Prompt': prompt,
+                'System Prompt': system_prompt,
+                'Output': output,
+                'Input Tokens': in_tok,
+                'Output Tokens': out_tok
+            })
+        except Exception as e:
+            results.append({
+                'Run Number': trial_number,
+                'Vendor': 'Gemini',
+                'Model': get_gemini_model(),
+                'User Prompt': prompt,
+                'System Prompt': system_prompt,
+                'Output': f"Error: {str(e)}",
+                'Input Tokens': None,
+                'Output Tokens': None
+            })
+    if 'anthropic' in vendors:
+        try:
+            output, in_tok, out_tok = process_with_anthropic(prompt, system_prompt)
+            results.append({
+                'Run Number': trial_number,
+                'Vendor': 'Anthropic',
+                'Model': get_anthropic_model(),
+                'User Prompt': prompt,
+                'System Prompt': system_prompt,
+                'Output': output,
+                'Input Tokens': in_tok,
+                'Output Tokens': out_tok
+            })
+        except Exception as e:
+            results.append({
+                'Run Number': trial_number,
+                'Vendor': 'Anthropic',
+                'Model': get_anthropic_model(),
+                'User Prompt': prompt,
+                'System Prompt': system_prompt,
+                'Output': f"Error: {str(e)}",
+                'Input Tokens': None,
+                'Output Tokens': None
+            })
+    if 'grok' in vendors:
+        try:
+            output, in_tok, out_tok = process_with_grok(prompt, system_prompt)
+            results.append({
+                'Run Number': trial_number,
+                'Vendor': 'Grok',
+                'Model': get_grok_model(),
+                'User Prompt': prompt,
+                'System Prompt': system_prompt,
+                'Output': output,
+                'Input Tokens': in_tok,
+                'Output Tokens': out_tok
+            })
+        except Exception as e:
+            results.append({
+                'Run Number': trial_number,
+                'Vendor': 'Grok',
+                'Model': get_grok_model(),
+                'User Prompt': prompt,
+                'System Prompt': system_prompt,
+                'Output': f"Error: {str(e)}",
+                'Input Tokens': None,
+                'Output Tokens': None
+            })
     return results
 
 
-def run_experiments(prompt=None, system_prompt=None, num_trials=None):
+def run_experiments(prompt=None, system_prompt=None, num_trials=None, vendors=None):
     """
-    Run the complete experiment across all LLM providers.
+    Run the complete experiment across selected LLM providers.
     
     Args:
         prompt (str): User prompt (defaults to config setting)
         system_prompt (str): System prompt (defaults to config setting)
         num_trials (int): Number of trials to run (defaults to config setting)
+        vendors (list or None): List of vendors to run (default: all)
     
     Returns:
         pandas.DataFrame: Results dataframe
@@ -160,12 +158,13 @@ def run_experiments(prompt=None, system_prompt=None, num_trials=None):
         system_prompt = DEFAULT_SYSTEM_PROMPT
     if num_trials is None:
         num_trials = DEFAULT_NUM_TRIALS
-    
+    if vendors is None:
+        vendors = ['openai', 'gemini', 'anthropic', 'grok']
     print(f"Starting token counter experiment:")
     print(f"  User prompt: '{prompt}'")
     print(f"  System prompt: '{system_prompt}'")
     print(f"  Number of trials: {num_trials}")
-    print(f"  Testing: OpenAI, Gemini, Anthropic, Grok")
+    print(f"  Testing: {', '.join([v.capitalize() for v in vendors])}")
     print()
     
     all_results = []
@@ -173,7 +172,7 @@ def run_experiments(prompt=None, system_prompt=None, num_trials=None):
     # Run trials
     for trial in range(1, num_trials + 1):
         print(f"Running trial {trial}/{num_trials}...")
-        trial_results = run_single_trial(prompt, system_prompt, trial)
+        trial_results = run_single_trial(prompt, system_prompt, trial, vendors=vendors)
         all_results.extend(trial_results)
     
     # Create DataFrame
@@ -294,6 +293,12 @@ Examples:
         help='Output CSV file (default: auto-generated in outputs/ folder)'
     )
     
+    parser.add_argument(
+        '--vendors', '-v',
+        default=None,
+        help='Comma-separated list of vendors to run (e.g., openai,gemini,anthropic,grok). Default: all.'
+    )
+    
     args = parser.parse_args()
     
     # Use defaults from config if not specified
@@ -304,6 +309,9 @@ Examples:
     output_file = args.output if args.output is not None else get_timestamped_filename()
     # Also generate a log file for failed calls
     log_failed_path = output_file.replace('.csv', '_failed.log')
+    
+    # Parse vendors argument
+    vendors = [v.strip().lower() for v in args.vendors.split(',')] if args.vendors else None
     
     print(f"Running token counter experiment...")
     print(f"User prompt: {user_prompt}")
@@ -317,7 +325,8 @@ Examples:
         df = run_experiments(
             prompt=user_prompt,
             system_prompt=system_prompt,
-            num_trials=args.trials
+            num_trials=args.trials,
+            vendors=vendors
         )
         # Save results
         save_results_to_csv(df, output_file)
