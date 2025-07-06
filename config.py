@@ -17,6 +17,30 @@ DEFAULT_USER_PROMPT = "Give me the word 'hello' without any puncuation or any ot
 DEFAULT_SYSTEM_PROMPT = ""
 DEFAULT_NUM_TRIALS = 3
 
+# Model and pricing information for cost calculations (USD per 1M tokens)
+MODELS_INFO = {
+    "openai": {
+        "model": "gpt-4o",
+        "input_cost_per_million": 5.00,    # USD per 1M input tokens
+        "output_cost_per_million": 15.00   # USD per 1M output tokens
+    },
+    "gemini": {
+        "model": "gemini-2.0-flash",
+        "input_cost_per_million": 0.35,    # USD per 1M input tokens
+        "output_cost_per_million": 1.05    # USD per 1M output tokens
+    },
+    "anthropic": {
+        "model": "claude-3-7-sonnet-20250219",
+        "input_cost_per_million": 3.00,    # USD per 1M input tokens
+        "output_cost_per_million": 15.00   # USD per 1M output tokens
+    },
+    "grok": {
+        "model": "grok-3-beta",
+        "input_cost_per_million": 0.00,    # Set to actual if available
+        "output_cost_per_million": 0.00    # Set to actual if available
+    }
+}
+
 # Model configurations
 MODELS = {
     "openai": "gpt-4o",
