@@ -131,6 +131,39 @@ Results:
 3. The system preserves these differences for accurate analysis
 4. CSV display may show newlines as formatting artifacts, but the data is correct
 
+## OpenAI Input Token Caching and Discounted Pricing
+
+OpenAI's API provides a unique feature: **input token caching**. When a prompt prefix (≥ 1,024 tokens) has been processed very recently, those tokens are fetched from an internal cache and billed at a discounted rate (typically 50% of the normal input price for GPT-4o). This is reflected in the API response:
+
+```jsonc
+"usage": {
+  "prompt_tokens": 2006,
+  "completion_tokens": 300,
+  "total_tokens": 2306,
+  "prompt_tokens_details": {
+      "cached_tokens": 1920,   // these came from the prompt cache
+      "audio_tokens": 0
+  },
+  "completion_tokens_details": {
+      "reasoning_tokens": 0,   // for hidden reasoning (always 0 for GPT-4o today)
+      "audio_tokens": 0
+  }
+}
+```
+
+- `prompt_tokens` includes all input tokens (cached and uncached).
+- `prompt_tokens_details.cached_tokens` is the subset that was cached and billed at a discount.
+- **There is no discount for output tokens.**
+
+**Cost calculation for OpenAI:**
+
+- `uncached_input = prompt_tokens - cached_tokens`
+- `cached_input = cached_tokens`
+- `output = completion_tokens`
+- `total_cost = (uncached_input * input_cost + cached_input * cached_input_cost + output * output_cost) / 1_000_000`
+
+Only OpenAI exposes this breakdown and discount. Other vendors do not currently expose or discount input caches in their APIs.
+
 ## Output Format
 
 Results are saved to `api_results.csv` with columns:
