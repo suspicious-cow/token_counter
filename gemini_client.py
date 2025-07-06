@@ -1,10 +1,15 @@
 """
 Gemini client module for token counting.
+
+Features:
+- Supports Gemini 2.5 Flash with controllable reasoning via thinking_budget
+- thinking_budget=0 disables internal reasoning (like GPT-4.1)
+- thinking_budget>0 enables reasoning with token limit (up to 24,576)
 """
 
 from google import genai
 from google.genai import types
-from config import GEMINI_API_KEY, MODELS
+from config import GEMINI_API_KEY, MODELS, GEMINI_THINKING_BUDGET
 
 
 def process_with_gemini(prompt, system_prompt, model=None):
@@ -25,11 +30,22 @@ def process_with_gemini(prompt, system_prompt, model=None):
     try:
         client = genai.Client(api_key=GEMINI_API_KEY)
         
-        # Create config with system instruction only if not empty
-        config = types.GenerateContentConfig()
+        # Create thinking configuration to control internal reasoning
+        # thinking_budget=0 disables reasoning (like non-reasoning models)
+        # thinking_budget>0 enables reasoning with specified token limit
+        thinking_config = types.ThinkingConfig(thinking_budget=GEMINI_THINKING_BUDGET)
+        
         if system_prompt:
             # Add system instruction if provided
-            config = types.GenerateContentConfig(system_instruction=system_prompt)
+            config = types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                thinking_config=thinking_config
+            )
+        else:
+            # Set thinking budget even without system instruction
+            config = types.GenerateContentConfig(
+                thinking_config=thinking_config
+            )
             
         response = client.models.generate_content(
             model=model,

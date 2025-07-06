@@ -107,10 +107,30 @@ The system calculates costs for each API call using current pricing information 
 
 | Provider | Input Cost | Cached Input Cost | Output Cost |
 |----------|------------|-------------------|-------------|
-| OpenAI GPT-4o | $2.50 | $1.25 | $10.00 |
-| Gemini 2.0 Flash | $0.35 | N/A | $1.05 |
+| OpenAI GPT-4.1 | $2.00 | $0.50 | $8.00 |
+| Gemini 2.5 Flash | $0.30 | N/A | $2.50 |
 | Anthropic Claude-3.5 Sonnet | $3.00 | N/A | $15.00 |
 | Grok 3 Beta | $0.00 | N/A | $0.00 |
+
+### Gemini 2.5 Flash: Controllable Reasoning
+
+Gemini 2.5 Flash supports controllable reasoning through the "thinking budget" parameter:
+
+- **thinking_budget = 0**: Disables internal reasoning (behaves like non-reasoning models such as GPT-4.1)
+- **thinking_budget > 0**: Enables internal reasoning with specified token limit (up to 24,576 tokens)
+
+Configure this in `config.py`:
+
+```python
+GEMINI_THINKING_BUDGET = 0  # Disable reasoning for faster, cheaper responses
+# OR
+GEMINI_THINKING_BUDGET = 1000  # Enable reasoning with 1000 token budget
+```
+
+This allows you to balance between:
+
+- **Speed & Cost**: Lower thinking budgets for simple tasks
+- **Quality & Reasoning**: Higher thinking budgets for complex problems
 
 ### Cost Calculation Details
 
