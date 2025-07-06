@@ -131,38 +131,45 @@ Results:
 3. The system preserves these differences for accurate analysis
 4. CSV display may show newlines as formatting artifacts, but the data is correct
 
-## OpenAI Input Token Caching and Discounted Pricing
+## OpenAI Input Token Caching and Cost Calculation
 
 OpenAI's API provides a unique feature: **input token caching**. When a prompt prefix (≥ 1,024 tokens) has been processed very recently, those tokens are fetched from an internal cache and billed at a discounted rate (typically 50% of the normal input price for GPT-4o). This is reflected in the API response:
 
 ```jsonc
 "usage": {
-  "prompt_tokens": 2006,
-  "completion_tokens": 300,
-  "total_tokens": 2306,
+  "prompt_tokens": 2006,                // total input tokens (cached + uncached)
+  "completion_tokens": 300,             // output tokens
   "prompt_tokens_details": {
-      "cached_tokens": 1920,   // these came from the prompt cache
-      "audio_tokens": 0
-  },
-  "completion_tokens_details": {
-      "reasoning_tokens": 0,   // for hidden reasoning (always 0 for GPT-4o today)
-      "audio_tokens": 0
+      "cached_tokens": 1920,            // these came from the prompt cache
+      // ...
   }
 }
 ```
 
-- `prompt_tokens` includes all input tokens (cached and uncached).
-- `prompt_tokens_details.cached_tokens` is the subset that was cached and billed at a discount.
-- **There is no discount for output tokens.**
+### How to Calculate OpenAI API Cost (with Caching)
 
-**Cost calculation for OpenAI:**
+Suppose:
 
-- `uncached_input = prompt_tokens - cached_tokens`
-- `cached_input = cached_tokens`
-- `output = completion_tokens`
-- `total_cost = (uncached_input * input_cost + cached_input * cached_input_cost + output * output_cost) / 1_000_000`
+- `prompt_tokens = 2006`
+- `cached_tokens = 1920`
+- `completion_tokens = 300`
+- `input_cost_per_million = $2.50`
+- `cached_input_cost_per_million = $1.25`
+- `output_cost_per_million = $10.00`
 
-Only OpenAI exposes this breakdown and discount. Other vendors do not currently expose or discount input caches in their APIs.
+Then:
+
+- `uncached_input = 2006 - 1920 = 86`
+- `cached_input = 1920`
+- `output_tokens = 300`
+- `total_cost = (86 * 2.50 + 1920 * 1.25 + 300 * 10.00) / 1_000_000 = $0.0031`
+
+**Note:**
+
+- Never subtract cached tokens from prompt tokens for cost after already splitting them out; each bucket is billed at its own rate.
+- This logic is implemented in the codebase for every OpenAI call.
+
+For more details, see [OpenAI Pricing](https://openai.com/pricing) and [community discussion](https://community.openai.com/t/how-to-get-the-cost-for-each-api-call/1227787).
 
 ## Output Format
 

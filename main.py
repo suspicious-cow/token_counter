@@ -16,7 +16,7 @@ import pandas as pd
 import argparse
 from config import (
     DEFAULT_USER_PROMPT, DEFAULT_SYSTEM_PROMPT, DEFAULT_NUM_TRIALS,
-    CSV_OUTPUT_PATH, CSV_COLUMNS, get_timestamped_filename
+    CSV_OUTPUT_PATH, CSV_COLUMNS, get_timestamped_filename, MODELS_INFO
 )
 from openai_client import process_with_openai, get_model_name as get_openai_model
 from gemini_client import process_with_gemini, get_model_name as get_gemini_model
@@ -42,6 +42,15 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
     if 'openai' in vendors:
         try:
             output, in_tok, cached_in_tok, out_tok = process_with_openai(prompt, system_prompt)
+            cached_input = int(cached_in_tok) if cached_in_tok is not None else 0
+            uncached_input = (in_tok or 0) - cached_input
+            output_tokens = out_tok or 0
+            # Ensure uncached_input is not negative
+            uncached_input = max(uncached_input, 0)
+            input_token_cost = uncached_input * MODELS_INFO['openai']['input_cost_per_million'] / 1_000_000
+            cached_token_cost = cached_input * MODELS_INFO['openai']['cached_input_cost_per_million'] / 1_000_000
+            output_token_cost = output_tokens * MODELS_INFO['openai']['output_cost_per_million'] / 1_000_000
+            cost = input_token_cost + cached_token_cost + output_token_cost
             results.append({
                 'Run Number': trial_number,
                 'Vendor': 'OpenAI',
@@ -50,8 +59,12 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'System Prompt': system_prompt,
                 'Output': output,
                 'Input Tokens': in_tok,
-                'Cached Input Tokens': int(cached_in_tok) if cached_in_tok is not None else 0,
-                'Output Tokens': out_tok
+                'Cached Input Tokens': cached_input,
+                'Output Tokens': out_tok,
+                'Input Token Cost (USD)': round(input_token_cost, 6),
+                'Cached Token Cost (USD)': round(cached_token_cost, 6),
+                'Output Token Cost (USD)': round(output_token_cost, 6),
+                'Cost (USD)': round(cost, 6)
             })
         except Exception as e:
             results.append({
@@ -63,11 +76,20 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Output': f"Error: {str(e)}",
                 'Input Tokens': None,
                 'Cached Input Tokens': 0,
-                'Output Tokens': None
+                'Output Tokens': None,
+                'Input Token Cost (USD)': None,
+                'Cached Token Cost (USD)': None,
+                'Output Token Cost (USD)': None,
+                'Cost (USD)': None
             })
     if 'gemini' in vendors:
         try:
             output, in_tok, out_tok = process_with_gemini(prompt, system_prompt)
+            input_tokens = in_tok or 0
+            output_tokens = out_tok or 0
+            input_token_cost = input_tokens * MODELS_INFO['gemini']['input_cost_per_million'] / 1_000_000
+            output_token_cost = output_tokens * MODELS_INFO['gemini']['output_cost_per_million'] / 1_000_000
+            cost = input_token_cost + output_token_cost
             results.append({
                 'Run Number': trial_number,
                 'Vendor': 'Gemini',
@@ -77,7 +99,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Output': output,
                 'Input Tokens': in_tok,
                 'Cached Input Tokens': 0,
-                'Output Tokens': out_tok
+                'Output Tokens': out_tok,
+                'Input Token Cost (USD)': round(input_token_cost, 6),
+                'Cached Token Cost (USD)': 0.0,
+                'Output Token Cost (USD)': round(output_token_cost, 6),
+                'Cost (USD)': round(cost, 6)
             })
         except Exception as e:
             results.append({
@@ -89,11 +115,20 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Output': f"Error: {str(e)}",
                 'Input Tokens': None,
                 'Cached Input Tokens': 0,
-                'Output Tokens': None
+                'Output Tokens': None,
+                'Input Token Cost (USD)': None,
+                'Cached Token Cost (USD)': None,
+                'Output Token Cost (USD)': None,
+                'Cost (USD)': None
             })
     if 'anthropic' in vendors:
         try:
             output, in_tok, out_tok = process_with_anthropic(prompt, system_prompt)
+            input_tokens = in_tok or 0
+            output_tokens = out_tok or 0
+            input_token_cost = input_tokens * MODELS_INFO['anthropic']['input_cost_per_million'] / 1_000_000
+            output_token_cost = output_tokens * MODELS_INFO['anthropic']['output_cost_per_million'] / 1_000_000
+            cost = input_token_cost + output_token_cost
             results.append({
                 'Run Number': trial_number,
                 'Vendor': 'Anthropic',
@@ -103,7 +138,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Output': output,
                 'Input Tokens': in_tok,
                 'Cached Input Tokens': 0,
-                'Output Tokens': out_tok
+                'Output Tokens': out_tok,
+                'Input Token Cost (USD)': round(input_token_cost, 6),
+                'Cached Token Cost (USD)': 0.0,
+                'Output Token Cost (USD)': round(output_token_cost, 6),
+                'Cost (USD)': round(cost, 6)
             })
         except Exception as e:
             results.append({
@@ -115,11 +154,20 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Output': f"Error: {str(e)}",
                 'Input Tokens': None,
                 'Cached Input Tokens': 0,
-                'Output Tokens': None
+                'Output Tokens': None,
+                'Input Token Cost (USD)': None,
+                'Cached Token Cost (USD)': None,
+                'Output Token Cost (USD)': None,
+                'Cost (USD)': None
             })
     if 'grok' in vendors:
         try:
             output, in_tok, out_tok = process_with_grok(prompt, system_prompt)
+            input_tokens = in_tok or 0
+            output_tokens = out_tok or 0
+            input_token_cost = input_tokens * MODELS_INFO['grok']['input_cost_per_million'] / 1_000_000
+            output_token_cost = output_tokens * MODELS_INFO['grok']['output_cost_per_million'] / 1_000_000
+            cost = input_token_cost + output_token_cost
             results.append({
                 'Run Number': trial_number,
                 'Vendor': 'Grok',
@@ -129,7 +177,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Output': output,
                 'Input Tokens': in_tok,
                 'Cached Input Tokens': 0,
-                'Output Tokens': out_tok
+                'Output Tokens': out_tok,
+                'Input Token Cost (USD)': round(input_token_cost, 6),
+                'Cached Token Cost (USD)': 0.0,
+                'Output Token Cost (USD)': round(output_token_cost, 6),
+                'Cost (USD)': round(cost, 6)
             })
         except Exception as e:
             results.append({
@@ -141,7 +193,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Output': f"Error: {str(e)}",
                 'Input Tokens': None,
                 'Cached Input Tokens': 0,
-                'Output Tokens': None
+                'Output Tokens': None,
+                'Input Token Cost (USD)': None,
+                'Cached Token Cost (USD)': None,
+                'Output Token Cost (USD)': None,
+                'Cost (USD)': None
             })
     return results
 
@@ -267,8 +323,9 @@ def display_summary(df, log_failed_path=None):
     token_summary = df.groupby('Vendor').agg({
         'Input Tokens': ['mean', 'sum'],
         'Cached Input Tokens': ['mean', 'sum'],
-        'Output Tokens': ['mean', 'sum']
-    }).round(2)
+        'Output Tokens': ['mean', 'sum'],
+        'Cost (USD)': ['mean', 'sum']
+    }).round(6)
     print(token_summary)
     
     # Sample outputs
