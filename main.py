@@ -270,7 +270,7 @@ Examples:
     parser.add_argument(
         '--output', '-o',
         default=None,
-        help='Output CSV file (default: auto-generated with timestamp)'
+        help='Output CSV file (default: auto-generated in outputs/ folder)'
     )
     
     args = parser.parse_args()
@@ -279,7 +279,7 @@ Examples:
     user_prompt = args.prompt if args.prompt is not None else DEFAULT_USER_PROMPT
     system_prompt = args.system if args.system is not None else DEFAULT_SYSTEM_PROMPT
     
-    # Generate timestamped filename if no output specified
+    # Generate timestamped filename in outputs/ if no output specified
     output_file = args.output if args.output is not None else get_timestamped_filename()
     
     print(f"Running token counter experiment...")

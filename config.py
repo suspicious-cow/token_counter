@@ -27,9 +27,9 @@ MODELS = {
 
 # Output settings
 def get_timestamped_filename(base_name="api_results", extension="csv"):
-    """Generate a timestamped filename for the current run."""
+    """Generate a timestamped filename for the current run in the outputs/ folder."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    return f"{base_name}_{timestamp}.{extension}"
+    return os.path.join("outputs", f"{base_name}_{timestamp}.{extension}")
 
 CSV_OUTPUT_PATH = "api_results.csv"  # Default fallback, usually overridden with timestamp
 CSV_COLUMNS = [
