@@ -35,8 +35,10 @@ MODELS_INFO = {
     },
     "gemini": {
         "model": "gemini-2.5-flash",
-        "input_cost_per_million": 0.30,    # USD per 1M input tokens (Gemini discounts context-cached input, but not exposed in API)
+        "input_cost_per_million": 0.30,    # USD per 1M *uncached* input tokens
+        "cached_input_cost_per_million": 0.075, # USD per 1M *cached* input tokens (75% discount from regular price)
         "output_cost_per_million": 2.50    # USD per 1M output tokens
+        # Note: Gemini supports both implicit (automatic) and explicit context caching with 75% discount
     },
     "anthropic": {
         "model": "claude-3-7-sonnet-20250219",
@@ -71,6 +73,12 @@ CSV_COLUMNS = [
     'System Prompt', 'Output', 'Input Tokens', 'Cached Input Tokens', 'Output Tokens',
     'Input Token Cost (USD)', 'Cached Token Cost (USD)', 'Output Token Cost (USD)', 'Cost (USD)'
 ]
+
+# Note: For providers with caching (OpenAI, Gemini):
+# - "Input Tokens" = regular/uncached input tokens only (I_reg)
+# - "Cached Input Tokens" = tokens retrieved from cache (I_cache) 
+# - Total input tokens = Input Tokens + Cached Input Tokens
+# - Costs are calculated using the respective pricing rates per the provider's formula
 
 # Anthropic specific settings
 ANTHROPIC_MAX_TOKENS = 1024

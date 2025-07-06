@@ -58,7 +58,7 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'User Prompt': prompt,
                 'System Prompt': system_prompt,
                 'Output': output,
-                'Input Tokens': in_tok,
+                'Input Tokens': uncached_input,
                 'Cached Input Tokens': cached_input,
                 'Output Tokens': out_tok,
                 'Input Token Cost (USD)': round(input_token_cost, 6),
@@ -84,12 +84,18 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             })
     if 'gemini' in vendors:
         try:
-            output, in_tok, out_tok = process_with_gemini(prompt, system_prompt)
-            input_tokens = in_tok or 0
+            output, in_tok, cached_in_tok, out_tok = process_with_gemini(prompt, system_prompt)
+            total_input_tokens = in_tok or 0
+            cached_input_tokens = cached_in_tok or 0
+            regular_input_tokens = total_input_tokens - cached_input_tokens
             output_tokens = out_tok or 0
-            input_token_cost = input_tokens * MODELS_INFO['gemini']['input_cost_per_million'] / 1_000_000
-            output_token_cost = output_tokens * MODELS_INFO['gemini']['output_cost_per_million'] / 1_000_000
-            cost = input_token_cost + output_token_cost
+            
+            # Cost calculation following Gemini's formula
+            regular_input_cost = regular_input_tokens * MODELS_INFO['gemini']['input_cost_per_million'] / 1_000_000
+            cached_input_cost = cached_input_tokens * MODELS_INFO['gemini']['cached_input_cost_per_million'] / 1_000_000
+            output_cost = output_tokens * MODELS_INFO['gemini']['output_cost_per_million'] / 1_000_000
+            # Note: Storage cost (H*S) not calculated since we don't have TTL info for implicit caching
+            total_cost = regular_input_cost + cached_input_cost + output_cost
             results.append({
                 'Run Number': trial_number,
                 'Vendor': 'Gemini',
@@ -97,13 +103,13 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'User Prompt': prompt,
                 'System Prompt': system_prompt,
                 'Output': output,
-                'Input Tokens': in_tok,
-                'Cached Input Tokens': 0,
-                'Output Tokens': out_tok,
-                'Input Token Cost (USD)': round(input_token_cost, 6),
-                'Cached Token Cost (USD)': 0.0,
-                'Output Token Cost (USD)': round(output_token_cost, 6),
-                'Cost (USD)': round(cost, 6)
+                'Input Tokens': total_input_tokens,
+                'Cached Input Tokens': cached_input_tokens,
+                'Output Tokens': output_tokens,
+                'Input Token Cost (USD)': round(regular_input_cost, 6),
+                'Cached Token Cost (USD)': round(cached_input_cost, 6),
+                'Output Token Cost (USD)': round(output_cost, 6),
+                'Cost (USD)': round(total_cost, 6)
             })
         except Exception as e:
             results.append({

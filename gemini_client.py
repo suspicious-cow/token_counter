@@ -22,7 +22,7 @@ def process_with_gemini(prompt, system_prompt, model=None):
         model (str): The model to use (defaults to config setting)
     
     Returns:
-        tuple: (output, input_tokens, output_tokens)
+        tuple: (output, input_tokens, cached_input_tokens, output_tokens)
     """
     if model is None:
         model = MODELS_INFO["gemini"]["model"]
@@ -59,9 +59,14 @@ def process_with_gemini(prompt, system_prompt, model=None):
         input_tokens = usage.prompt_token_count if usage and hasattr(usage, 'prompt_token_count') else None
         output_tokens = usage.candidates_token_count if usage and hasattr(usage, 'candidates_token_count') else None
         
-        return output, input_tokens, output_tokens
+        # Check for cached token information (may be available depending on Gemini API version)
+        cached_input_tokens = None
+        if usage and hasattr(usage, 'cached_content_token_count'):
+            cached_input_tokens = usage.cached_content_token_count
+        
+        return output, input_tokens, cached_input_tokens, output_tokens
     except Exception as e:
-        return f"Gemini error: {str(e)}", None, None
+        return f"Gemini error: {str(e)}", None, None, None
 
 
 def get_model_name():

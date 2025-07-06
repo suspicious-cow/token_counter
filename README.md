@@ -2,11 +2,14 @@
 
 A modular Python system for comparing token usage and outputs across multiple Large Language Model (LLM) providers: OpenAI, Google Gemini, Anthropic Claude, and xAI Grok.
 
+**Focus**: This tool analyzes **text-based inputs and outputs only**. It does not handle multimodal features like image processing, vision capabilities, or audio generation.
+
 ## Features
 
-- **Multi-Provider Support**: OpenAI GPT-4, Google Gemini, Anthropic Claude, and xAI Grok
+- **Multi-Provider Support**: OpenAI GPT-4, Google Gemini, Anthropic Claude, and xAI Grok (text generation only)
 - **Official Token Counts**: Uses each provider's official API token counts (not estimates)
 - **Cost Calculations**: Detailed cost breakdown using current pricing for each provider
+- **Text-Only Analysis**: Focused on text input/output token analysis and cost comparisons
 - **Centralized Configuration**: Easy prompt and model customization in `config.py`
 - **CSV Export**: Raw data output for analysis and visualization
 - **Experiment Summaries**: Comprehensive reports with cost analysis and failed call tracking
@@ -108,7 +111,7 @@ The system calculates costs for each API call using current pricing information 
 | Provider | Input Cost | Cached Input Cost | Output Cost |
 |----------|------------|-------------------|-------------|
 | OpenAI GPT-4.1 | $2.00 | $0.50 | $8.00 |
-| Gemini 2.5 Flash | $0.30 | N/A | $2.50 |
+| Gemini 2.5 Flash | $0.30 | $0.075 | $2.50 |
 | Anthropic Claude-3.5 Sonnet | $3.00 | N/A | $15.00 |
 | Grok 3 Beta | $0.00 | N/A | $0.00 |
 
@@ -135,30 +138,44 @@ This allows you to balance between:
 ### Cost Calculation Details
 
 - **OpenAI**: Supports input token caching with 50% discount on cached tokens
+- **Gemini**: Supports context caching with 75% discount on cached tokens (both implicit and explicit caching)
 - **Other Providers**: Standard input/output token pricing (no cache discount exposed)
 - **Grok**: Currently set to $0.00 (update `config.py` when pricing is available)
 - **All costs** are calculated per API call and aggregated in the experiment summary
 
+### Gemini Context Caching
+
+Gemini 2.5 Flash supports context caching with significant cost savings:
+
+- **Cache Discount**: 75% off regular input token pricing
+- **Minimum Threshold**: 1,024 tokens for Gemini 2.5 Flash
+- **Cache Types**:
+  - **Implicit**: Automatic caching for similar prompts within short timeframes
+  - **Explicit**: Manual caching via API for large documents/media
+- **TTL**: Default 1 hour (customizable)
+
 ## Token Counting Implementation
 
-### ✅ Official API Token Counts
+### ✅ Official API Token Counts (Text Only)
 
-All clients use official token counts from each provider's API response:
+All clients use official token counts from each provider's API response for **text-based interactions only**:
 
 - **OpenAI**: `response.usage.prompt_tokens` / `response.usage.completion_tokens`
 - **Anthropic**: `message.usage.input_tokens` / `message.usage.output_tokens`
 - **Gemini**: `response.usage_metadata.prompt_token_count` / `response.usage_metadata.candidates_token_count`
 - **Grok**: `completion.usage.prompt_tokens` / `completion.usage.completion_tokens`
 
-### 🔍 Important: LLM Output Format Differences
+**Note**: This tool does not analyze multimodal features (images, audio, vision) - only text input and text output token usage.
 
-**Critical Discovery**: Different LLMs format their outputs differently, which affects token counts:
+### 🔍 Important: LLM Text Output Format Differences
+
+**Critical Discovery**: Different LLMs format their text outputs differently, which affects token counts:
 
 - **OpenAI/Grok**: Return clean text (e.g., `"hello"` = 1 token)
 - **Gemini**: Includes newline characters (e.g., `"hello\n"` = 2 tokens)
 - **Anthropic**: May include additional formatting tokens
 
-**Example from actual test results:**
+**Example from actual test results (text-only):**
 
 ```text
 Prompt: "Give me the word 'hello' without any punctuation or any other characters"
@@ -359,4 +376,4 @@ This project is for educational and research purposes. Please respect each API p
 
 ---
 
-**Note**: This tool captures genuine differences in how LLMs format their outputs. Token count variations between providers reflect real behavioral differences, not measurement errors.
+**Note**: This tool captures genuine differences in how LLMs format their text outputs. Token count variations between providers reflect real behavioral differences in text generation, not measurement errors. Multimodal features (images, audio, vision) are not analyzed by this tool.
