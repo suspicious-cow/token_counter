@@ -50,7 +50,7 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'System Prompt': system_prompt,
                 'Output': output,
                 'Input Tokens': in_tok,
-                'Cached Input Tokens': cached_in_tok,
+                'Cached Input Tokens': int(cached_in_tok) if cached_in_tok is not None else 0,
                 'Output Tokens': out_tok
             })
         except Exception as e:
@@ -62,7 +62,7 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'System Prompt': system_prompt,
                 'Output': f"Error: {str(e)}",
                 'Input Tokens': None,
-                'Cached Input Tokens': None,
+                'Cached Input Tokens': 0,
                 'Output Tokens': None
             })
     if 'gemini' in vendors:
@@ -76,7 +76,7 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'System Prompt': system_prompt,
                 'Output': output,
                 'Input Tokens': in_tok,
-                'Cached Input Tokens': None,
+                'Cached Input Tokens': 0,
                 'Output Tokens': out_tok
             })
         except Exception as e:
@@ -88,7 +88,7 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'System Prompt': system_prompt,
                 'Output': f"Error: {str(e)}",
                 'Input Tokens': None,
-                'Cached Input Tokens': None,
+                'Cached Input Tokens': 0,
                 'Output Tokens': None
             })
     if 'anthropic' in vendors:
@@ -102,7 +102,7 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'System Prompt': system_prompt,
                 'Output': output,
                 'Input Tokens': in_tok,
-                'Cached Input Tokens': None,
+                'Cached Input Tokens': 0,
                 'Output Tokens': out_tok
             })
         except Exception as e:
@@ -114,7 +114,7 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'System Prompt': system_prompt,
                 'Output': f"Error: {str(e)}",
                 'Input Tokens': None,
-                'Cached Input Tokens': None,
+                'Cached Input Tokens': 0,
                 'Output Tokens': None
             })
     if 'grok' in vendors:
@@ -128,7 +128,7 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'System Prompt': system_prompt,
                 'Output': output,
                 'Input Tokens': in_tok,
-                'Cached Input Tokens': None,
+                'Cached Input Tokens': 0,
                 'Output Tokens': out_tok
             })
         except Exception as e:
@@ -140,7 +140,7 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'System Prompt': system_prompt,
                 'Output': f"Error: {str(e)}",
                 'Input Tokens': None,
-                'Cached Input Tokens': None,
+                'Cached Input Tokens': 0,
                 'Output Tokens': None
             })
     return results
