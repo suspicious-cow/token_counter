@@ -202,7 +202,23 @@ def save_results_to_csv(df, output_path=None):
         output_path = CSV_OUTPUT_PATH
     
     df.to_csv(output_path, index=False, encoding='utf-8')
-    print(f"Results saved to {output_path}")
+    print(f"Raw data saved to {output_path}")
+
+
+def save_experiment_summary(df, summary_path):
+    """
+    Save the experiment summary (as printed) to a text file.
+    """
+    from io import StringIO
+    import sys
+    # Capture the printed summary
+    old_stdout = sys.stdout
+    sys.stdout = mystdout = StringIO()
+    display_summary(df)
+    sys.stdout = old_stdout
+    with open(summary_path, 'w', encoding='utf-8') as f:
+        f.write(mystdout.getvalue())
+    print(f"Experiment summary saved to {summary_path}")
 
 
 def display_summary(df, log_failed_path=None):
@@ -314,9 +330,11 @@ Examples:
     system_prompt = args.system if args.system is not None else DEFAULT_SYSTEM_PROMPT
     
     # Generate timestamped filename in outputs/ if no output specified
-    output_file = args.output if args.output is not None else get_timestamped_filename()
+    output_file = args.output if args.output is not None else get_timestamped_filename(base_name="api_raw")
     # Also generate a log file for failed calls
     log_failed_path = output_file.replace('.csv', '_failed.log')
+    # Generate summary file name
+    summary_file = output_file.replace('api_raw', 'experiment_summary').replace('.csv', '.txt')
     
     # Parse vendors argument
     vendors = [v.strip().lower() for v in args.vendors.split(',')] if args.vendors else None
@@ -336,8 +354,10 @@ Examples:
             num_trials=args.trials,
             vendors=vendors
         )
-        # Save results
+        # Save raw results
         save_results_to_csv(df, output_file)
+        # Save experiment summary to a separate file
+        save_experiment_summary(df, summary_file)
         # Display summary and log failed calls
         display_summary(df, log_failed_path=log_failed_path)
         print(f"\nExperiment completed successfully!")
