@@ -6,7 +6,7 @@ Contains API keys, default settings, and model configurations.
 import os
 from datetime import datetime
 
-# API Keys - Load from environment variables with fallback defaults
+# API Keys - Load from environment variables with fallback to manually entered keys if needed
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "your-openai-api-key")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "your-anthropic-api-key")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "your-gemini-api-key")

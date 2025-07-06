@@ -198,12 +198,13 @@ def save_results_to_csv(df, output_path=None):
     print(f"Results saved to {output_path}")
 
 
-def display_summary(df):
+def display_summary(df, log_failed_path=None):
     """
-    Display a summary of the results.
-    
+    Display a summary of the results, including failed call breakdown by vendor.
+    Optionally log failed calls to a file for troubleshooting.
     Args:
         df (pandas.DataFrame): Results dataframe
+        log_failed_path (str): Path to log file for failed calls (optional)
     """
     print("\n" + "="*50)
     print("EXPERIMENT SUMMARY")
@@ -217,6 +218,26 @@ def display_summary(df):
     print(f"Total API calls: {total_calls}")
     print(f"Successful calls: {successful_calls}")
     print(f"Failed calls: {failed_calls}")
+    
+    # Failed calls by vendor
+    failed = df[df['Output'].str.contains('error', case=False, na=False)]
+    if not failed.empty:
+        print("\nFailed calls by vendor:")
+        failed_counts = failed['Vendor'].value_counts()
+        for vendor, count in failed_counts.items():
+            print(f"  {vendor}: {count}")
+        # Log failed calls to file if requested
+        if log_failed_path:
+            with open(log_failed_path, 'w', encoding='utf-8') as f:
+                f.write("Failed API Calls by Vendor\n")
+                for vendor in failed['Vendor'].unique():
+                    f.write(f"\nVendor: {vendor}\n")
+                    vendor_failed = failed[failed['Vendor'] == vendor]
+                    for _, row in vendor_failed.iterrows():
+                        f.write(f"  Run {row['Run Number']}: {row['Output']}\n")
+            print(f"\nDetailed failed call log written to: {log_failed_path}")
+    else:
+        print("\nNo failed calls by vendor.")
     
     # Token summary by vendor
     print("\nToken usage by vendor:")
@@ -281,6 +302,8 @@ Examples:
     
     # Generate timestamped filename in outputs/ if no output specified
     output_file = args.output if args.output is not None else get_timestamped_filename()
+    # Also generate a log file for failed calls
+    log_failed_path = output_file.replace('.csv', '_failed.log')
     
     print(f"Running token counter experiment...")
     print(f"User prompt: {user_prompt}")
@@ -296,20 +319,14 @@ Examples:
             system_prompt=system_prompt,
             num_trials=args.trials
         )
-          # Save results
+        # Save results
         save_results_to_csv(df, output_file)
-        
-        # Display summary
-        display_summary(df)
-        
+        # Display summary and log failed calls
+        display_summary(df, log_failed_path=log_failed_path)
         print(f"\nExperiment completed successfully!")
-        
     except Exception as e:
         print(f"Error running experiments: {str(e)}")
         return 1
-    
-    return 0
-    
     return 0
 
 
