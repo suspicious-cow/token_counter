@@ -5,6 +5,11 @@ Contains API keys, default settings, and model configurations.
 
 import os
 from datetime import datetime
+try:
+    from zoneinfo import ZoneInfo  # Python 3.9+
+
+except ImportError:
+    from pytz import timezone as ZoneInfo  # Fallback for older Python
 
 # API Keys - Load from environment variables with fallback to manually entered keys if needed
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "your-openai-api-key")
@@ -52,10 +57,18 @@ MODELS = {
     "grok": "grok-3-beta"
 }
 
+# Timezone configuration (default: Central Time)
+TIMEZONE = os.getenv("TOKEN_COUNTER_TIMEZONE", "America/Chicago")  # Change to your preferred IANA timezone string
+
 # Output settings
 def get_timestamped_filename(base_name="api_results", extension="csv"):
-    """Generate a timestamped filename for the current run in the outputs/ folder."""
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    """Generate a timestamped filename for the current run in the outputs/ folder, using 24-hour time and configured timezone."""
+    try:
+        tz = ZoneInfo(TIMEZONE)
+    except Exception:
+        tz = None  # Fallback to naive datetime if timezone fails
+    now = datetime.now(tz) if tz else datetime.now()
+    timestamp = now.strftime("%Y%m%d_%H%M%S")  # 24-hour time
     return os.path.join("outputs", f"{base_name}_{timestamp}.{extension}")
 
 CSV_OUTPUT_PATH = "api_results.csv"  # Default fallback, usually overridden with timestamp
