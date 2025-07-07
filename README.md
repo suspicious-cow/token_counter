@@ -108,12 +108,14 @@ The system calculates costs for each API call using current pricing information 
 
 ### Current Pricing (USD per 1M tokens)
 
-| Provider | Input Cost | Cached Input Cost | Output Cost |
-|----------|------------|-------------------|-------------|
-| OpenAI GPT-4.1 | $2.00 | $0.50 | $8.00 |
-| Gemini 2.5 Flash | $0.30 | $0.075 | $2.50 |
-| Anthropic Claude-3.7 Sonnet | $3.00 | $0.30 | $15.00 |
-| Grok 3 | $3.00 | $0.75 | $15.00 |
+| Provider | Model | Input Cost | Cached Input Cost | Output Cost |
+|----------|-------|------------|-------------------|-------------|
+| OpenAI | gpt-4.1 | $2.00 | $0.50 | $8.00 |
+| Gemini | gemini-2.5-flash | $0.30 | $0.075 | $2.50 |
+| Anthropic | claude-sonnet-4-20250514 | $3.00 | $0.30 | $15.00 |
+| Grok | grok-3 | $3.00 | $0.75 | $15.00 |
+
+> **Note:** All model names and pricing are maintained in `config.py` under the `MODELS_INFO` dictionary. This is the single source of truth for model selection and cost calculations. If providers update their pricing, update `MODELS_INFO` accordingly.
 
 ### Gemini 2.5 Flash: Controllable Reasoning
 
@@ -180,6 +182,8 @@ xAI's Grok models support prompt caching similar to OpenAI:
   - `completion_tokens`: Output tokens (no caching)
 - **Cache Behavior**: Automatic caching for repeated prompt prefixes
 - **Context Window**: 1M tokens for Grok 3
+
+**Important Note**: Unlike OpenAI and Anthropic (which only cache prompts of 1024+ tokens), Grok has no documented minimum threshold for caching. In practice, Grok may cache and discount even very short prompts (as few as 1–2 tokens), especially if they match common phrases or substrings. This is expected behavior and not a bug in this tool.
 
 **Note**: Grok's caching follows OpenAI's pattern with cached tokens being a subset of total prompt tokens.
 
