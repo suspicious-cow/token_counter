@@ -113,7 +113,7 @@ The system calculates costs for each API call using current pricing information 
 | OpenAI GPT-4.1 | $2.00 | $0.50 | $8.00 |
 | Gemini 2.5 Flash | $0.30 | $0.075 | $2.50 |
 | Anthropic Claude-3.7 Sonnet | $3.00 | $0.30 | $15.00 |
-| Grok 3 Beta | $0.00 | N/A | $0.00 |
+| Grok 3 | $3.00 | $0.75 | $15.00 |
 
 ### Gemini 2.5 Flash: Controllable Reasoning
 
@@ -140,7 +140,7 @@ This allows you to balance between:
 - **OpenAI**: Supports input token caching with 75% discount on cached tokens
 - **Gemini**: Supports context caching with 75% discount on cached tokens (both implicit and explicit caching)
 - **Anthropic**: Supports prompt caching with 90% discount on cached tokens (cache reads)
-- **Grok**: Standard input/output token pricing (no cache discount exposed)
+- **Grok**: Supports prompt caching with 75% discount on cached tokens
 - **All costs** are calculated per API call and aggregated in the experiment summary
 
 ### Gemini Context Caching
@@ -169,6 +169,20 @@ Anthropic's Claude models support prompt caching with the highest discount rates
 
 **Note**: This tool combines `cache_creation_input_tokens` and `cache_read_input_tokens` into "Cached Input Tokens" for consistency with other providers.
 
+### Grok Prompt Caching
+
+xAI's Grok models support prompt caching similar to OpenAI:
+
+- **Cache Discount**: 75% off regular input token pricing
+- **API Fields**:
+  - `prompt_tokens`: Total input tokens
+  - `prompt_tokens_details.cached_tokens`: Tokens served from cache (75% discount)
+  - `completion_tokens`: Output tokens (no caching)
+- **Cache Behavior**: Automatic caching for repeated prompt prefixes
+- **Context Window**: 1M tokens for Grok 3
+
+**Note**: Grok's caching follows OpenAI's pattern with cached tokens being a subset of total prompt tokens.
+
 ## Token Counting Implementation
 
 ### ✅ Official API Token Counts (Text Only)
@@ -178,7 +192,7 @@ All clients use official token counts from each provider's API response for **te
 - **OpenAI**: `response.usage.prompt_tokens` / `response.usage.completion_tokens` + caching details
 - **Anthropic**: `message.usage.input_tokens` / `message.usage.output_tokens` + caching details
 - **Gemini**: `response.usage_metadata.prompt_token_count` / `response.usage_metadata.candidates_token_count` + caching details
-- **Grok**: `completion.usage.prompt_tokens` / `completion.usage.completion_tokens`
+- **Grok**: `completion.usage.prompt_tokens` / `completion.usage.completion_tokens` + caching details
 
 **Note**: This tool does not analyze multimodal features (images, audio, vision) - only text input and text output token usage.
 

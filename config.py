@@ -18,7 +18,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "your-gemini-api-key")
 GROK_API_KEY = os.getenv("GROK_API_KEY", "your-grok-api-key")
 
 # Default prompts and settings
-DEFAULT_USER_PROMPT = "Give me the word 'hello' without any puncuation or any other characters"
+DEFAULT_USER_PROMPT = "Give me one sentence about what a penguin is."
 DEFAULT_SYSTEM_PROMPT = ""
 DEFAULT_NUM_TRIALS = 3
 
@@ -41,16 +41,18 @@ MODELS_INFO = {
         # Note: Gemini supports both implicit (automatic) and explicit context caching with 75% discount
     },
     "anthropic": {
-        "model": "claude-3-7-sonnet-20250219",
+        "model": "claude-sonnet-4-20250514",
         "input_cost_per_million": 3.00,    # USD per 1M input tokens
         "cached_input_cost_per_million": 0.30, # USD per 1M cached input tokens (90% discount for cache reads)
         "output_cost_per_million": 15.00   # USD per 1M output tokens
         # Note: Anthropic charges 25% premium for cache writes, 90% discount for cache reads
     },
     "grok": {
-        "model": "grok-3-beta",
-        "input_cost_per_million": 0.00,    # Set to actual if available
-        "output_cost_per_million": 0.00    # Set to actual if available
+        "model": "grok-3",
+        "input_cost_per_million": 3.00,    # USD per 1M input tokens
+        "cached_input_cost_per_million": 0.75, # USD per 1M cached input tokens (75% discount)
+        "output_cost_per_million": 15.00   # USD per 1M output tokens
+        # Note: Grok supports prompt caching with 75% discount on cached tokens
     }
 }
 
@@ -76,7 +78,7 @@ CSV_COLUMNS = [
     'Input Token Cost (USD)', 'Cached Token Cost (USD)', 'Output Token Cost (USD)', 'Cost (USD)'
 ]
 
-# Note: For providers with caching (OpenAI, Gemini, Anthropic):
+# Note: For providers with caching (OpenAI, Gemini, Anthropic, Grok):
 # - "Input Tokens" = regular/uncached input tokens only (I_reg)
 # - "Cached Input Tokens" = tokens retrieved from cache (I_cache) 
 # - Total input tokens = Input Tokens + Cached Input Tokens

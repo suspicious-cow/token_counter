@@ -16,7 +16,7 @@ def process_with_grok(prompt, system_prompt, model=None):
         model (str): The model to use (defaults to config setting)
     
     Returns:
-        tuple: (output, input_tokens, output_tokens)
+        tuple: (output, input_tokens, cached_input_tokens, output_tokens)
     """
     if model is None:
         model = MODELS_INFO["grok"]["model"]
@@ -41,9 +41,16 @@ def process_with_grok(prompt, system_prompt, model=None):
         input_tokens = getattr(completion.usage, 'prompt_tokens', None)
         output_tokens = getattr(completion.usage, 'completion_tokens', None)
         
-        return output, input_tokens, output_tokens
+        # Get cached tokens from prompt_tokens_details
+        cached_tokens = 0
+        if (hasattr(completion, 'usage') and completion.usage and 
+            hasattr(completion.usage, 'prompt_tokens_details') and 
+            completion.usage.prompt_tokens_details):
+            cached_tokens = getattr(completion.usage.prompt_tokens_details, 'cached_tokens', 0) or 0
+        
+        return output, input_tokens, cached_tokens, output_tokens
     except Exception as e:
-        return f"Grok error: {str(e)}", None, None
+        return f"Grok error: {str(e)}", None, 0, None
 
 
 def get_model_name():
