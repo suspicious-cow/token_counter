@@ -79,9 +79,9 @@ CSV_COLUMNS = [
 ]
 
 # Note: For providers with caching (OpenAI, Gemini, Anthropic, Grok):
-# - "Input Tokens" = regular/uncached input tokens only (I_reg)
+# - "Input Tokens" = TOTAL input tokens from API (I_total)
 # - "Cached Input Tokens" = tokens retrieved from cache (I_cache) 
-# - Total input tokens = Input Tokens + Cached Input Tokens
+# - Uncached input tokens = Input Tokens - Cached Input Tokens (calculated for cost only)
 # - Costs are calculated using the respective pricing rates per the provider's formula
 
 # Anthropic specific settings

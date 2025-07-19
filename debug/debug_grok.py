@@ -2,6 +2,10 @@
 Debug script to inspect Grok API response structure.
 """
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from openai import OpenAI
 from config import GROK_API_KEY, MODELS_INFO, GROK_BASE_URL
 import json
