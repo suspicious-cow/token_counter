@@ -1,5 +1,6 @@
 """
 OpenAI client module for token counting.
+Backward compatibility wrapper for the enhanced client architecture.
 """
 
 from openai import OpenAI
@@ -18,6 +19,16 @@ def process_with_openai(prompt, system_prompt, model=None):
     Returns:
         tuple: (output, input_tokens, cached_input_tokens, output_tokens)
     """
+    # Try to use enhanced client first, fall back to original implementation
+    try:
+        from clients.openai_client import OpenAIClient
+        client = OpenAIClient()
+        response = client.process(prompt, system_prompt, model)
+        return response.output, response.usage.input_tokens, response.usage.cached_input_tokens, response.usage.output_tokens
+    except ImportError:
+        # Fallback to original implementation
+        pass
+    
     if model is None:
         model = MODELS_INFO["openai"]["model"]
     
