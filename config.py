@@ -72,7 +72,7 @@ def get_timestamped_filename(base_name="api_results", extension="csv"):
     except Exception:
         tz = None
     now = datetime.now(tz) if tz else datetime.now()
-    timestamp = now.strftime("%Y%m%d_%H%M%S")
+    timestamp = now.strftime("%Y%m%d_%H%M%S") + f"{now.microsecond // 1000:03d}"
     tz_abbr = now.strftime('%Z') if tz else "local"
     return os.path.join("outputs", f"{base_name}_{timestamp}_{tz_abbr}.{extension}")
 
