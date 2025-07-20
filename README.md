@@ -5,6 +5,7 @@ A comprehensive, production-ready Python system for comparing token usage, costs
 ## 🚀 New Enhanced Features
 
 ### Architecture Improvements
+
 - **Modular Client Architecture**: Clean base client with standardized interfaces
 - **Client Factory Pattern**: Centralized client management and validation
 - **Enhanced Error Handling**: Retry logic with exponential backoff
@@ -12,12 +13,14 @@ A comprehensive, production-ready Python system for comparing token usage, costs
 - **Comprehensive Analytics**: Advanced cost analysis and visualization
 
 ### Enhanced User Experience
+
 - **Interactive CLI Mode**: Guided experiment setup
 - **Rich Console Output**: Beautiful terminal interface with progress indicators
 - **Comprehensive Reporting**: Detailed analysis with charts and statistics
 - **API Key Validation**: Automatic validation and status reporting
 
 ### Advanced Analytics
+
 - **Cost Comparison Charts**: Visual cost analysis across providers
 - **Token Efficiency Analysis**: Output tokens per dollar calculations
 - **Outlier Detection**: Identify unusual responses or costs
@@ -26,6 +29,7 @@ A comprehensive, production-ready Python system for comparing token usage, costs
 ## 🎯 Quick Start
 
 ### Enhanced Mode (Recommended)
+
 ```bash
 # Interactive mode with guided setup
 python cli/interactive.py
@@ -41,6 +45,7 @@ python main.py --enhanced --prompt "Explain AI" --trials 5 --vendors openai,gemi
 ```
 
 ### Classic Mode (Backward Compatible)
+
 ```bash
 # Original functionality preserved
 python main.py --prompt "Hello world" --trials 3
@@ -49,6 +54,7 @@ python main.py --prompt "Hello world" --trials 3
 ## 📊 Enhanced Output Files
 
 Each experiment now generates:
+
 - **Raw Data CSV**: Complete results with token counts and costs
 - **Comprehensive Analysis**: Statistical summary with efficiency metrics
 - **Cost Comparison Charts**: Visual analysis (PNG format)
@@ -57,6 +63,7 @@ Each experiment now generates:
 ## 🏗️ Architecture Overview
 
 ### New File Structure
+
 ```
 ├── clients/                    # Enhanced client architecture
 │   ├── base_client.py         # Abstract base client
@@ -85,6 +92,7 @@ Each experiment now generates:
 ### Client Architecture
 
 All clients now inherit from `BaseLLMClient` providing:
+
 - Standardized response format (`LLMResponse` dataclass)
 - Consistent error handling
 - Unified cost calculations
@@ -105,6 +113,7 @@ print(f"Tokens: {response.usage.input_tokens} in, {response.usage.output_tokens}
 ## 🔧 Enhanced Configuration
 
 ### API Key Validation
+
 ```python
 from config.validation import validate_api_keys, print_validation_report
 
@@ -114,6 +123,7 @@ print_validation_report()
 ```
 
 ### Rate Limiting Configuration
+
 ```python
 from utils.rate_limiter import RateLimiter
 
@@ -127,6 +137,7 @@ limiter = RateLimiter({
 ## 📈 Advanced Analytics
 
 ### Comprehensive Analysis
+
 ```python
 from analytics.analyzer import ExperimentAnalyzer
 
@@ -146,6 +157,7 @@ analyzer.generate_comprehensive_report()
 ```
 
 ### Sample Analytics Output
+
 ```
 Token Efficiency (Output Tokens per Dollar):
   Gemini: 83,333 tokens/$
@@ -162,6 +174,7 @@ Outlier Detection:
 ## 🧪 Testing
 
 ### Run Test Suite
+
 ```bash
 # Install test dependencies
 pip install pytest
@@ -174,6 +187,7 @@ python -m pytest tests/test_clients.py -v
 ```
 
 ### Test Coverage
+
 - Client architecture validation
 - Cost calculation accuracy
 - Error handling scenarios
@@ -183,16 +197,19 @@ python -m pytest tests/test_clients.py -v
 ## 🚦 Error Handling & Resilience
 
 ### Retry Logic
+
 - Exponential backoff with jitter
 - Configurable retry attempts
 - Smart error classification
 
 ### Rate Limiting
+
 - Provider-specific limits
 - Automatic throttling
 - Configurable intervals
 
 ### Comprehensive Error Reporting
+
 - Detailed failed call logs
 - Success rate tracking by provider
 - Error categorization and analysis
@@ -200,6 +217,7 @@ python -m pytest tests/test_clients.py -v
 ## 🎨 Interactive Mode Features
 
 The new interactive CLI provides:
+
 - **Guided Setup**: Step-by-step experiment configuration
 - **API Key Validation**: Real-time status checking
 - **Provider Selection**: Choose from available providers
@@ -213,12 +231,14 @@ python cli/interactive.py
 ## 📊 Enhanced Reporting
 
 ### Experiment Summary
+
 - Success rates by provider
 - Cost analysis with statistics
 - Token efficiency rankings
 - Outlier identification
 
 ### Visual Analytics
+
 - Cost distribution box plots
 - Token usage comparisons
 - Efficiency bar charts
@@ -227,6 +247,7 @@ python cli/interactive.py
 ## 🔄 Backward Compatibility
 
 All original functionality is preserved:
+
 - Original `main.py` works unchanged
 - All client functions maintain same signatures
 - Existing scripts continue to work
@@ -235,11 +256,13 @@ All original functionality is preserved:
 ## 🚀 Performance Improvements
 
 ### Concurrent Processing
+
 - Rate-limited concurrent API calls
 - Intelligent request batching
 - Optimized retry strategies
 
 ### Memory Efficiency
+
 - Streaming result processing
 - Efficient data structures
 - Minimal memory footprint
@@ -247,16 +270,19 @@ All original functionality is preserved:
 ## 🛠️ Development Features
 
 ### Extensibility
+
 - Easy to add new providers
 - Plugin architecture ready
 - Configurable components
 
 ### Monitoring
+
 - Comprehensive logging
 - Performance metrics
 - Error tracking
 
 ### Testing
+
 - Unit test coverage
 - Integration tests
 - Mock API responses
@@ -266,16 +292,19 @@ All original functionality is preserved:
 ### From Original to Enhanced
 
 1. **Install new dependencies**:
+
    ```bash
    pip install -r requirements.txt
    ```
 
 2. **Try enhanced mode**:
+
    ```bash
-   python main_enhanced.py --validate-only
+   python main.py --validate-only
    ```
 
 3. **Use interactive mode**:
+
    ```bash
    python cli/interactive.py
    ```
@@ -285,6 +314,7 @@ All original functionality is preserved:
 ## 🤝 Contributing
 
 The enhanced architecture makes contributions easier:
+
 - Clear separation of concerns
 - Comprehensive test suite
 - Standardized interfaces
