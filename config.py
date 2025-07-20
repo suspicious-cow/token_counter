@@ -28,23 +28,23 @@ DEFAULT_NUM_TRIALS = 3
 # Last updated: January 2025
 MODELS_INFO = {
     "openai": {
-        "model": "gpt-4.1-2025-04-14",  # Match actual model from vendor data
-        "input_cost_per_million": 2.00,    # USD per 1M input tokens (gpt-4.1 pricing)
-        "cached_input_cost_per_million": 0.50, # USD per 1M cached input tokens (75% discount)
-        "output_cost_per_million": 8.00   # USD per 1M output tokens (gpt-4.1 pricing)
+        "model": "gpt-4o-2024-11-20",  # Latest GPT-4o model (November 2024)
+        "input_cost_per_million": 2.50,    # USD per 1M input tokens (gpt-4o pricing)
+        "cached_input_cost_per_million": 1.25, # USD per 1M cached input tokens (50% discount)
+        "output_cost_per_million": 10.00   # USD per 1M output tokens (gpt-4o pricing)
         # Note: OpenAI automatic prompt caching - 75% discount on cached input tokens (≥1024 tokens)
         # Caching is automatic for repeated prompt prefixes, no explicit cache management needed
     },
     "gemini": {
-        "model": "gemini-2.5-flash",
-        "input_cost_per_million": 0.30,    # USD per 1M input tokens
-        "cached_input_cost_per_million": 0.075, # USD per 1M cached input tokens (75% discount)
-        "output_cost_per_million": 2.50    # USD per 1M output tokens
+        "model": "gemini-2.0-flash-exp",  # Latest Gemini 2.0 Flash (experimental)
+        "input_cost_per_million": 0.00,    # USD per 1M input tokens (currently free during preview)
+        "cached_input_cost_per_million": 0.00, # USD per 1M cached input tokens (currently free)
+        "output_cost_per_million": 0.00    # USD per 1M output tokens (currently free during preview)
         # Note: Gemini 2.5 Flash supports context caching with 75% discount (≥32K tokens for explicit caching)
         # Implicit caching may occur automatically for repeated content
     },
     "anthropic": {
-        "model": "claude-sonnet-4-20250514",  # Match actual model from vendor data
+        "model": "claude-3-5-sonnet-20241022",  # Latest Claude 3.5 Sonnet (New)
         "input_cost_per_million": 3.00,    # USD per 1M input tokens
         "cached_input_cost_per_million": 0.30, # USD per 1M cached input tokens (90% discount for cache reads)
         "output_cost_per_million": 15.00   # USD per 1M output tokens
@@ -52,7 +52,7 @@ MODELS_INFO = {
         # Cache expires ~5 minutes after last access, requires explicit cache control blocks
     },
     "grok": {
-        "model": "grok-beta",  # Updated to current model name
+        "model": "grok-2-public",  # Latest public non-reasoning model
         "input_cost_per_million": 5.00,    # USD per 1M input tokens (updated pricing)
         "cached_input_cost_per_million": 1.25, # USD per 1M cached input tokens (75% discount)
         "output_cost_per_million": 15.00   # USD per 1M output tokens
