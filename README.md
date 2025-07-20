@@ -1,6 +1,6 @@
 # Token Counter - Enhanced LLM Comparison Tool
 
-A comprehensive, production-ready Python system for comparing token usage, costs, and outputs across multiple Large Language Model (LLM) providers with advanced analytics and monitoring capabilities.
+A comprehensive system for comparing token usage, costs, and outputs across multiple Large Language Model (LLM) providers with advanced analytics and monitoring capabilities.
 
 ## 🚀 New Enhanced Features
 
