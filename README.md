@@ -39,7 +39,7 @@ A system for comparing token usage, costs, and outputs across multiple Large Lan
 2. **Set up API keys** as environment variables:
 
    ```bash
-   
+
    export OPENAI_API_KEY="your-openai-api-key"
    export ANTHROPIC_API_KEY="your-anthropic-api-key"
    export GEMINI_API_KEY="your-gemini-api-key"
@@ -248,12 +248,12 @@ python main.py --validate-only
 **Output example**:
 
 ```markdown
-API Key Validation Report:
-------------------------------
-Openai       ✅ Valid
-Gemini       ✅ Valid
-Anthropic    ❌ Invalid/Missing
-Grok         ✅ Valid
+## API Key Validation Report:
+
+Openai ✅ Valid
+Gemini ✅ Valid
+Anthropic ❌ Invalid/Missing
+Grok ✅ Valid
 
 Valid providers: 3/4
 ```
@@ -293,6 +293,26 @@ python main.py --trials 1 --vendors openai --prompt "Test prompt"
 python main.py --enhanced --vendors anthropic --trials 3
 ```
 
+## 🧠 Reasoning Model Handling
+
+This system is configured to avoid reasoning tokens that could skew token count comparisons:
+
+### Model Selection
+
+- **OpenAI**: `gpt-4.1` (non-reasoning model)
+- **Gemini**: `gemini-2.5-flash` with reasoning **disabled** (`thinking_budget=0`)
+- **Anthropic**: `claude-sonnet-4-20250514` (non-reasoning model)
+- **Grok**: `grok-3` (non-reasoning model)
+
+### Reasoning Configuration
+
+- **Gemini 2.5 Flash**: Controllable reasoning via `thinking_budget` parameter
+  - Set to `0` to disable internal reasoning (behaves like non-reasoning models)
+  - Configurable in `config.py`: `GEMINI_THINKING_BUDGET = 0`
+- **Other providers**: Use standard non-reasoning models
+
+This ensures fair token count comparisons without hidden reasoning overhead that could affect cost analysis.
+
 ## 📊 Enhanced Output Files
 
 Each experiment now generates:
@@ -307,28 +327,28 @@ Each experiment now generates:
 ### New File Structure
 
 ```markdown
-├── clients/                    # Enhanced client architecture
-│   ├── base_client.py         # Abstract base client
-│   ├── openai_client.py       # Enhanced OpenAI client
-│   ├── gemini_client.py       # Enhanced Gemini client
-│   ├── anthropic_client.py    # Enhanced Anthropic client
-│   └── grok_client.py         # Enhanced Grok client
-├── config/                    # Configuration management
-│   └── validation.py          # API key validation utilities
-├── utils/                     # Utility modules
-│   ├── retry.py              # Retry logic with backoff
-│   └── rate_limiter.py       # Rate limiting utilities
-├── analytics/                 # Advanced analytics
-│   └── analyzer.py           # Comprehensive analysis tools
-├── cli/                      # Interactive CLI
-│   └── interactive.py        # Guided experiment setup
-├── tests/                    # Test suite
-│   └── test_clients.py       # Client testing
-├── examples/                  # Demo and example scripts
-│   └── demo.py              # Feature demonstration
-├── client_factory.py         # Client factory pattern
-├── main.py                   # Main script (classic + enhanced modes)
-└── [other files...]          # Configuration, requirements, etc.
+├── clients/ # Enhanced client architecture
+│ ├── base_client.py # Abstract base client
+│ ├── openai_client.py # Enhanced OpenAI client
+│ ├── gemini_client.py # Enhanced Gemini client
+│ ├── anthropic_client.py # Enhanced Anthropic client
+│ └── grok_client.py # Enhanced Grok client
+├── config/ # Configuration management
+│ └── validation.py # API key validation utilities
+├── utils/ # Utility modules
+│ ├── retry.py # Retry logic with backoff
+│ └── rate_limiter.py # Rate limiting utilities
+├── analytics/ # Advanced analytics
+│ └── analyzer.py # Comprehensive analysis tools
+├── cli/ # Interactive CLI
+│ └── interactive.py # Guided experiment setup
+├── tests/ # Test suite
+│ └── test_clients.py # Client testing
+├── examples/ # Demo and example scripts
+│ └── demo.py # Feature demonstration
+├── client_factory.py # Client factory pattern
+├── main.py # Main script (classic + enhanced modes)
+└── [other files...] # Configuration, requirements, etc.
 ```
 
 ### Client Architecture
@@ -402,15 +422,15 @@ analyzer.generate_comprehensive_report()
 
 ```markdown
 Token Efficiency (Output Tokens per Dollar):
-  Gemini: 83,333 tokens/$
+Gemini: 83,333 tokens/$
   OpenAI: 12,500 tokens/$
-  Grok: 6,667 tokens/$w
+Grok: 6,667 tokens/$w
   Anthropic: 3,333 tokens/$
 
 Outlier Detection:
-  High cost outliers: 2
-  High token outliers: 1
-  Unusual responses: 0
+High cost outliers: 2
+High token outliers: 1
+Unusual responses: 0
 ```
 
 ## 🧪 Testing
