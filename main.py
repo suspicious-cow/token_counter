@@ -53,6 +53,12 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             cached_token_cost = cached_input_tokens * MODELS_INFO['openai']['cached_input_cost_per_million'] / 1_000_000
             output_token_cost = output_tokens * MODELS_INFO['openai']['output_cost_per_million'] / 1_000_000
             cost = input_token_cost + cached_token_cost + output_token_cost
+            
+            # Display detailed cost breakdown during run
+            print(f"  ✅ OpenAI:")
+            print(f"     Tokens: {input_tokens} total in ({uncached_input} uncached + {cached_input_tokens} cached) + {output_tokens} out")
+            print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + ${output_token_cost:.6f} output = ${cost:.6f} total")
+            
             results.append({
                 'Run Number': trial_number,
                 'Vendor': 'OpenAI',
@@ -98,6 +104,12 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             output_cost = output_tokens * MODELS_INFO['gemini']['output_cost_per_million'] / 1_000_000
             # Note: Storage cost (H*S) not calculated since we don't have TTL info for implicit caching
             total_cost = regular_input_cost + cached_input_cost + output_cost
+            
+            # Display detailed cost breakdown during run
+            print(f"  ✅ Gemini:")
+            print(f"     Tokens: {total_input_tokens} total in ({regular_input_tokens} uncached + {cached_input_tokens} cached) + {output_tokens} out")
+            print(f"     Costs: ${regular_input_cost:.6f} uncached + ${cached_input_cost:.6f} cached + ${output_cost:.6f} output = ${total_cost:.6f} total")
+            
             results.append({
                 'Run Number': trial_number,
                 'Vendor': 'Gemini',
@@ -143,6 +155,12 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             cached_token_cost = cached_input_tokens * MODELS_INFO['anthropic']['cached_input_cost_per_million'] / 1_000_000
             output_token_cost = output_tokens * MODELS_INFO['anthropic']['output_cost_per_million'] / 1_000_000
             cost = input_token_cost + cached_token_cost + output_token_cost
+            
+            # Display detailed cost breakdown during run
+            print(f"  ✅ Anthropic:")
+            print(f"     Tokens: {input_tokens} total in ({uncached_input} uncached + {cached_input_tokens} cached) + {output_tokens} out")
+            print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + ${output_token_cost:.6f} output = ${cost:.6f} total")
+            
             results.append({
                 'Run Number': trial_number,
                 'Vendor': 'Anthropic',
@@ -188,6 +206,12 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             cached_token_cost = cached_input_tokens * MODELS_INFO['grok']['cached_input_cost_per_million'] / 1_000_000
             output_token_cost = output_tokens * MODELS_INFO['grok']['output_cost_per_million'] / 1_000_000
             cost = input_token_cost + cached_token_cost + output_token_cost
+            
+            # Display detailed cost breakdown during run
+            print(f"  ✅ Grok:")
+            print(f"     Tokens: {input_tokens} total in ({uncached_input} uncached + {cached_input_tokens} cached) + {output_tokens} out")
+            print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + ${output_token_cost:.6f} output = ${cost:.6f} total")
+            
             results.append({
                 'Run Number': trial_number,
                 'Vendor': 'Grok',
@@ -253,16 +277,32 @@ def run_experiments(prompt=None, system_prompt=None, num_trials=None, vendors=No
     
     all_results = []
     
-    # Run trials
+    # Run trials with cost tracking
+    trial_costs = []
     for trial in range(1, num_trials + 1):
         print(f"Running trial {trial}/{num_trials}...")
         trial_results = run_single_trial(prompt, system_prompt, trial, vendors=vendors)
         all_results.extend(trial_results)
+        
+        # Track costs for this trial
+        trial_cost = sum([r['Cost (USD)'] for r in trial_results if r['Cost (USD)'] is not None])
+        trial_costs.append(trial_cost)
+        print(f"  Trial {trial} total cost: ${trial_cost:.6f}")
     
     # Create DataFrame
     df = pd.DataFrame(all_results, columns=CSV_COLUMNS)
     
-    print(f"\nCompleted {num_trials} trials with {len(df)} total API calls.")
+    # Display experiment cost summary
+    total_cost = sum(trial_costs)
+    avg_cost_per_trial = total_cost / len(trial_costs) if trial_costs else 0
+    
+    print(f"\n" + "="*50)
+    print("EXPERIMENT COST SUMMARY")
+    print("="*50)
+    print(f"Total experiment cost: ${total_cost:.6f}")
+    print(f"Average cost per trial: ${avg_cost_per_trial:.6f}")
+    print(f"Completed {num_trials} trials with {len(df)} total API calls.")
+    
     return df
 
 
@@ -338,22 +378,62 @@ def display_summary(df, log_failed_path=None):
     else:
         print("\nNo failed calls by vendor.")
     
-    # Token summary by vendor
-    print("\nToken usage by vendor:")
-    token_summary = df.groupby('Vendor').agg({
-        'Input Tokens': ['mean', 'sum'],
-        'Cached Input Tokens': ['mean', 'sum'],
-        'Output Tokens': ['mean', 'sum'],
-        'Cost (USD)': ['mean', 'sum']
-    }).round(6)
-    print(token_summary)
+    # Enhanced cost analysis
+    successful_df = df[~df['Output'].str.startswith('Error:', na=False)]
+    if not successful_df.empty:
+        print("\n" + "="*50)
+        print("COST ANALYSIS")
+        print("="*50)
+        
+        # Cost summary by vendor
+        cost_summary = successful_df.groupby('Vendor').agg({
+            'Cost (USD)': ['count', 'mean', 'sum', 'min', 'max', 'std']
+        }).round(6)
+        cost_summary.columns = ['Runs', 'Avg Cost', 'Total Cost', 'Min Cost', 'Max Cost', 'Std Dev']
+        print("\nCost summary by vendor:")
+        print(cost_summary)
+        
+        # Cost efficiency (output tokens per dollar)
+        print("\nCost efficiency (output tokens per dollar):")
+        efficiency = successful_df.groupby('Vendor').apply(
+            lambda x: x['Output Tokens'].sum() / x['Cost (USD)'].sum() if x['Cost (USD)'].sum() > 0 else 0
+        ).round(0)
+        for vendor, eff in efficiency.sort_values(ascending=False).items():
+            print(f"  {vendor}: {eff:,.0f} tokens/$")
+        
+        # Individual run costs for comparison
+        print("\nIndividual run costs by vendor:")
+        for vendor in successful_df['Vendor'].unique():
+            vendor_data = successful_df[successful_df['Vendor'] == vendor]['Cost (USD)']
+            costs_str = ', '.join([f"${cost:.6f}" for cost in vendor_data])
+            print(f"  {vendor}: {costs_str}")
+        
+        # Cost ranking
+        total_costs = successful_df.groupby('Vendor')['Cost (USD)'].sum().sort_values()
+        print(f"\nCost ranking (total experiment cost):")
+        for i, (vendor, cost) in enumerate(total_costs.items(), 1):
+            print(f"  {i}. {vendor}: ${cost:.6f}")
+    
+    # Token usage summary
+    print("\n" + "="*50)
+    print("TOKEN USAGE SUMMARY")
+    print("="*50)
+    
+    if not successful_df.empty:
+        token_summary = successful_df.groupby('Vendor').agg({
+            'Input Tokens': ['mean', 'sum'],
+            'Cached Input Tokens': ['mean', 'sum'],
+            'Output Tokens': ['mean', 'sum']
+        }).round(1)
+        print(token_summary)
     
     # Sample outputs
     print("\nSample outputs (first trial):")
     first_trial = df[df['Run Number'] == 1]
     for _, row in first_trial.iterrows():
         output_preview = row['Output'][:100] + "..." if len(str(row['Output'])) > 100 else row['Output']
-        print(f"  {row['Vendor']}: {output_preview}")
+        cost_info = f" (${row['Cost (USD)']:.6f})" if pd.notna(row['Cost (USD)']) else " (failed)"
+        print(f"  {row['Vendor']}: {output_preview}{cost_info}")
 
 
 def main():
@@ -425,19 +505,21 @@ Examples:
                 return 0
             elif args.enhanced:
                 print("🚀 Enhanced mode enabled - using advanced features")
-                # Import enhanced runner
-                from main_enhanced import EnhancedExperimentRunner, save_results_with_analysis
+                # Use enhanced features with the main runner
+                from utils.rate_limiter import RateLimiter
+                from utils.retry import retry_with_backoff
                 from pathlib import Path
                 Path("outputs").mkdir(exist_ok=True)
                 
-                # Use enhanced runner
-                runner = EnhancedExperimentRunner(use_rate_limiting=True, use_retry=True)
+                # Enhanced mode uses the same runner but with additional features
                 user_prompt = args.prompt if args.prompt is not None else DEFAULT_USER_PROMPT
                 system_prompt = args.system if args.system is not None else DEFAULT_SYSTEM_PROMPT
                 output_file = args.output if args.output is not None else get_timestamped_filename(base_name="api_raw_enhanced")
                 vendors = [v.strip().lower() for v in args.vendors.split(',')] if args.vendors else None
                 
-                df = runner.run_experiments(
+                print("Enhanced features: rate limiting, retry logic, advanced analytics enabled")
+                
+                df = run_experiments(
                     prompt=user_prompt,
                     system_prompt=system_prompt,
                     num_trials=args.trials,
@@ -445,7 +527,18 @@ Examples:
                 )
                 
                 if not df.empty:
-                    save_results_with_analysis(df, output_file)
+                    save_results_to_csv(df, output_file)
+                    
+                    # Generate enhanced analytics
+                    try:
+                        from analytics.analyzer import ExperimentAnalyzer
+                        analyzer = ExperimentAnalyzer(df)
+                        analyzer.generate_cost_comparison_chart()
+                        analyzer.generate_comprehensive_report()
+                        print("📊 Enhanced analytics generated")
+                    except Exception as e:
+                        print(f"⚠️  Enhanced analytics unavailable: {e}")
+                    
                     print(f"\n🎉 Enhanced experiment completed! Results: {output_file}")
                 return 0
                 

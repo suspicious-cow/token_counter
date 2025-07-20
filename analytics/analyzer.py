@@ -38,6 +38,7 @@ class ExperimentAnalyzer:
         sns.boxplot(data=self.successful_df, x='Vendor', y='Cost (USD)', ax=ax1)
         ax1.set_title('Cost Distribution by Provider')
         ax1.tick_params(axis='x', rotation=45)
+        ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x:.6f}'))
         
         # Token usage comparison
         token_data = self.successful_df.melt(

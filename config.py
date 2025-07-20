@@ -24,35 +24,40 @@ DEFAULT_NUM_TRIALS = 3
 
 # Model and pricing information for cost calculations (USD per 1M tokens)
 # This is the single source of truth for both model names and pricing
-# Unfortunately, most providers don't offer pricing through the API so updating cost is a manual process
+# Pricing is manually maintained - update when providers change rates
+# Last updated: January 2025
 MODELS_INFO = {
     "openai": {
-        "model": "gpt-4.1",
-        "input_cost_per_million": 2.00,    # USD per 1M *uncached* input tokens
-        "cached_input_cost_per_million": 0.50, # USD per 1M *cached* input tokens (OpenAI cache discount, see docs)
-        "output_cost_per_million": 8.00   # USD per 1M output tokens (no discount for completions)
-        # Note: Only OpenAI exposes cached input tokens and discounts them. See comments below.
+        "model": "gpt-4o",
+        "input_cost_per_million": 2.50,    # USD per 1M input tokens
+        "cached_input_cost_per_million": 1.25, # USD per 1M cached input tokens (50% discount)
+        "output_cost_per_million": 10.00   # USD per 1M output tokens
+        # Note: OpenAI automatic prompt caching - 50% discount on cached input tokens (≥1024 tokens)
+        # Caching is automatic for repeated prompt prefixes, no explicit cache management needed
     },
     "gemini": {
         "model": "gemini-2.5-flash",
-        "input_cost_per_million": 0.30,    # USD per 1M *uncached* input tokens
-        "cached_input_cost_per_million": 0.075, # USD per 1M *cached* input tokens (75% discount from regular price)
+        "input_cost_per_million": 0.30,    # USD per 1M input tokens
+        "cached_input_cost_per_million": 0.075, # USD per 1M cached input tokens (75% discount)
         "output_cost_per_million": 2.50    # USD per 1M output tokens
-        # Note: Gemini supports both implicit (automatic) and explicit context caching with 75% discount
+        # Note: Gemini 2.5 Flash supports context caching with 75% discount (≥32K tokens for explicit caching)
+        # Implicit caching may occur automatically for repeated content
     },
     "anthropic": {
-        "model": "claude-sonnet-4-20250514",
+        "model": "claude-3-5-sonnet-20241022",
         "input_cost_per_million": 3.00,    # USD per 1M input tokens
         "cached_input_cost_per_million": 0.30, # USD per 1M cached input tokens (90% discount for cache reads)
         "output_cost_per_million": 15.00   # USD per 1M output tokens
-        # Note: Anthropic charges 25% premium for cache writes, 90% discount for cache reads
+        # Note: Anthropic prompt caching - 90% discount on cache reads, 25% premium on cache writes (≥1024 tokens)
+        # Cache expires ~5 minutes after last access, requires explicit cache control blocks
     },
     "grok": {
-        "model": "grok-3",
-        "input_cost_per_million": 3.00,    # USD per 1M input tokens
-        "cached_input_cost_per_million": 0.75, # USD per 1M cached input tokens (75% discount)
+        "model": "grok-beta",  # Updated to current model name
+        "input_cost_per_million": 5.00,    # USD per 1M input tokens (updated pricing)
+        "cached_input_cost_per_million": 1.25, # USD per 1M cached input tokens (75% discount)
         "output_cost_per_million": 15.00   # USD per 1M output tokens
-        # Note: Grok supports prompt caching with 75% discount on cached tokens
+        # Note: Grok prompt caching - 75% discount on cached tokens, follows OpenAI-compatible format
+        # Automatic caching for repeated prompt prefixes, no minimum token requirement documented
     }
 }
 
