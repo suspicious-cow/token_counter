@@ -1,5 +1,6 @@
 """
 Enhanced Gemini client using base client architecture.
+Includes backward compatibility functions.
 """
 
 from google import genai
@@ -55,3 +56,29 @@ class GeminiClient(BaseLLMClient):
     def get_model_name(self) -> str:
         """Get the default model name for Gemini"""
         return MODELS_INFO["gemini"]["model"]
+
+
+# Backward compatibility functions
+def process_with_gemini(prompt, system_prompt, model=None):
+    """
+    Backward compatibility wrapper for the enhanced client.
+    
+    Args:
+        prompt (str): The user prompt
+        system_prompt (str): The system prompt (can be empty)
+        model (str): The model to use (defaults to config setting)
+    
+    Returns:
+        tuple: (output, input_tokens, cached_input_tokens, output_tokens)
+    """
+    try:
+        client = GeminiClient()
+        response = client.process(prompt, system_prompt, model)
+        return response.output, response.usage.input_tokens, response.usage.cached_input_tokens, response.usage.output_tokens
+    except Exception as e:
+        return f"Gemini error: {str(e)}", None, None, None
+
+
+def get_model_name():
+    """Backward compatibility wrapper"""
+    return GeminiClient().get_model_name()

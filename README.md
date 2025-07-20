@@ -31,13 +31,13 @@ A comprehensive, production-ready Python system for comparing token usage, costs
 python cli/interactive.py
 
 # Enhanced CLI with all features
-python main_enhanced.py
+python main.py --enhanced --prompt "Explain AI" --trials 5
 
 # Validate API keys
-python main_enhanced.py --validate-only
+python main.py --validate-only
 
 # Custom experiment with analytics
-python main_enhanced.py --prompt "Explain AI" --trials 5 --vendors openai,gemini
+python main.py --enhanced --prompt "Explain AI" --trials 5 --vendors openai,gemini
 ```
 
 ### Classic Mode (Backward Compatible)
@@ -75,9 +75,11 @@ Each experiment now generates:
 │   └── interactive.py        # Guided experiment setup
 ├── tests/                    # Test suite
 │   └── test_clients.py       # Client testing
+├── examples/                  # Demo and example scripts
+│   └── demo.py              # Feature demonstration
 ├── client_factory.py         # Client factory pattern
-├── main_enhanced.py          # Enhanced main script
-└── [original files...]       # Backward compatibility maintained
+├── main.py                   # Main script (classic + enhanced modes)
+└── [other files...]          # Configuration, requirements, etc.
 ```
 
 ### Client Architecture

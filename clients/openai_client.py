@@ -1,5 +1,6 @@
 """
 Enhanced OpenAI client using base client architecture.
+Includes backward compatibility functions.
 """
 
 from openai import OpenAI
@@ -48,3 +49,26 @@ class OpenAIClient(BaseLLMClient):
     def get_model_name(self) -> str:
         """Get the default model name for OpenAI"""
         return MODELS_INFO["openai"]["model"]
+
+
+# Backward compatibility functions
+def process_with_openai(prompt, system_prompt, model=None):
+    """
+    Backward compatibility wrapper for the enhanced client.
+    
+    Args:
+        prompt (str): The user prompt
+        system_prompt (str): The system prompt (can be empty)
+        model (str): The model to use (defaults to config setting)
+    
+    Returns:
+        tuple: (output, input_tokens, cached_input_tokens, output_tokens)
+    """
+    client = OpenAIClient()
+    response = client.process(prompt, system_prompt, model)
+    return response.output, response.usage.input_tokens, response.usage.cached_input_tokens, response.usage.output_tokens
+
+
+def get_model_name():
+    """Backward compatibility wrapper"""
+    return OpenAIClient().get_model_name()

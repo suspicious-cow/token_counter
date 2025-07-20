@@ -18,10 +18,10 @@ from config import (
     DEFAULT_USER_PROMPT, DEFAULT_SYSTEM_PROMPT, DEFAULT_NUM_TRIALS,
     CSV_OUTPUT_PATH, CSV_COLUMNS, get_timestamped_filename, MODELS_INFO
 )
-from openai_client import process_with_openai, get_model_name as get_openai_model
-from gemini_client import process_with_gemini, get_model_name as get_gemini_model
-from anthropic_client import process_with_anthropic, get_model_name as get_anthropic_model
-from grok_client import process_with_grok, get_model_name as get_grok_model
+from clients.openai_client import process_with_openai, get_model_name as get_openai_model
+from clients.gemini_client import process_with_gemini, get_model_name as get_gemini_model
+from clients.anthropic_client import process_with_anthropic, get_model_name as get_anthropic_model
+from clients.grok_client import process_with_grok, get_model_name as get_grok_model
 
 
 def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
@@ -367,6 +367,7 @@ Examples:
     python main.py --prompt "Explain quantum computing in one sentence"
     python main.py --trials 5 --output "quantum_test.csv"
     python main.py --prompt "Hello" --system "Be concise" --trials 1
+    python main.py --enhanced --validate-only
         """
     )
     
@@ -401,7 +402,58 @@ Examples:
         help='Comma-separated list of vendors to run (e.g., openai,gemini,anthropic,grok). Default: all.'
     )
     
+    parser.add_argument(
+        '--enhanced', 
+        action='store_true',
+        help='Use enhanced features (rate limiting, retry logic, advanced analytics)'
+    )
+    
+    parser.add_argument(
+        '--validate-only', 
+        action='store_true',
+        help='Only validate API keys and exit'
+    )
+    
     args = parser.parse_args()
+    
+    # Handle enhanced features
+    if args.enhanced or args.validate_only:
+        try:
+            from config.validation import print_validation_report
+            if args.validate_only:
+                print_validation_report()
+                return 0
+            elif args.enhanced:
+                print("🚀 Enhanced mode enabled - using advanced features")
+                # Import enhanced runner
+                from main_enhanced import EnhancedExperimentRunner, save_results_with_analysis
+                from pathlib import Path
+                Path("outputs").mkdir(exist_ok=True)
+                
+                # Use enhanced runner
+                runner = EnhancedExperimentRunner(use_rate_limiting=True, use_retry=True)
+                user_prompt = args.prompt if args.prompt is not None else DEFAULT_USER_PROMPT
+                system_prompt = args.system if args.system is not None else DEFAULT_SYSTEM_PROMPT
+                output_file = args.output if args.output is not None else get_timestamped_filename(base_name="api_raw_enhanced")
+                vendors = [v.strip().lower() for v in args.vendors.split(',')] if args.vendors else None
+                
+                df = runner.run_experiments(
+                    prompt=user_prompt,
+                    system_prompt=system_prompt,
+                    num_trials=args.trials,
+                    vendors=vendors
+                )
+                
+                if not df.empty:
+                    save_results_with_analysis(df, output_file)
+                    print(f"\n🎉 Enhanced experiment completed! Results: {output_file}")
+                return 0
+                
+        except ImportError as e:
+            print(f"Enhanced features not available: {e}")
+            print("Install requirements: pip install rich matplotlib seaborn")
+            if args.validate_only:
+                return 1
     
     # Use defaults from config if not specified
     user_prompt = args.prompt if args.prompt is not None else DEFAULT_USER_PROMPT

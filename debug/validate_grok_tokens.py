@@ -2,7 +2,7 @@
 Validation script to ensure Grok cached token counting is 100% accurate.
 """
 
-from grok_client import process_with_grok
+from clients.grok_client import process_with_grok
 from openai import OpenAI
 from config import GROK_API_KEY, MODELS_INFO, GROK_BASE_URL
 

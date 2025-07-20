@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Demo script showcasing the enhanced Token Counter features.
+Demo script showcasing the Token Counter features.
 """
 
 import sys
 from pathlib import Path
 
-# Add current directory to path
-sys.path.insert(0, str(Path(__file__).parent))
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from rich.console import Console
 from rich.panel import Panel
@@ -116,8 +116,8 @@ def demo_analytics():
 def main():
     """Run all demos"""
     console.print(Panel(
-        "[bold cyan]🚀 Enhanced Token Counter - Feature Demo[/bold cyan]\n\n"
-        "This demo showcases the new enhanced features without making actual API calls.",
+        "[bold cyan]🚀 Token Counter - Feature Demo[/bold cyan]\n\n"
+        "This demo showcases the enhanced features without making actual API calls.",
         title="Welcome",
         border_style="cyan"
     ))
@@ -138,9 +138,9 @@ def main():
     console.print(Panel(
         "[bold green]✅ Demo completed![/bold green]\n\n"
         "To run actual experiments:\n"
-        "• [cyan]python main_enhanced.py --validate-only[/cyan] - Check API keys\n"
+        "• [cyan]python main.py --validate-only[/cyan] - Check API keys\n"
         "• [cyan]python cli/interactive.py[/cyan] - Interactive mode\n"
-        "• [cyan]python main_enhanced.py --prompt 'Hello'[/cyan] - Quick test",
+        "• [cyan]python main.py --prompt 'Hello' --enhanced[/cyan] - Enhanced features",
         title="Next Steps",
         border_style="green"
     ))
