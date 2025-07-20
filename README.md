@@ -396,6 +396,22 @@ output_cost = output_tokens × output_rate
 total_cost = uncached_input_cost + cached_input_cost + output_cost
 ```
 
+### Cost Verification
+
+For manual cost verification:
+
+1. Run controlled experiment with a specific verification prompt
+2. Check each vendor's billing dashboard manually
+3. Compare token counts and costs with experiment output
+4. Verify pricing configuration matches actual billing rates
+
+Check the following dashboards:
+
+- OpenAI: https://platform.openai.com/usage
+- Anthropic: https://console.anthropic.com/
+- Gemini: https://console.cloud.google.com/billing
+- Grok: https://console.x.ai/
+
 ## 📊 Enhanced Output Files
 
 Each experiment now generates:

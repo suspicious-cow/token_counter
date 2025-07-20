@@ -28,11 +28,11 @@ DEFAULT_NUM_TRIALS = 3
 # Last updated: January 2025
 MODELS_INFO = {
     "openai": {
-        "model": "gpt-4o",
-        "input_cost_per_million": 2.50,    # USD per 1M input tokens
-        "cached_input_cost_per_million": 1.25, # USD per 1M cached input tokens (50% discount)
-        "output_cost_per_million": 10.00   # USD per 1M output tokens
-        # Note: OpenAI automatic prompt caching - 50% discount on cached input tokens (≥1024 tokens)
+        "model": "gpt-4.1-2025-04-14",  # Match actual model from vendor data
+        "input_cost_per_million": 2.00,    # USD per 1M input tokens (gpt-4.1 pricing)
+        "cached_input_cost_per_million": 0.50, # USD per 1M cached input tokens (75% discount)
+        "output_cost_per_million": 8.00   # USD per 1M output tokens (gpt-4.1 pricing)
+        # Note: OpenAI automatic prompt caching - 75% discount on cached input tokens (≥1024 tokens)
         # Caching is automatic for repeated prompt prefixes, no explicit cache management needed
     },
     "gemini": {
@@ -44,7 +44,7 @@ MODELS_INFO = {
         # Implicit caching may occur automatically for repeated content
     },
     "anthropic": {
-        "model": "claude-3-5-sonnet-20241022",
+        "model": "claude-sonnet-4-20250514",  # Match actual model from vendor data
         "input_cost_per_million": 3.00,    # USD per 1M input tokens
         "cached_input_cost_per_million": 0.30, # USD per 1M cached input tokens (90% discount for cache reads)
         "output_cost_per_million": 15.00   # USD per 1M output tokens
