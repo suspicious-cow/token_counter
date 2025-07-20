@@ -7,7 +7,7 @@ from google import genai
 from google.genai import types
 from typing import Optional
 from .base_client import BaseLLMClient
-from config import GEMINI_API_KEY, MODELS_INFO, GEMINI_THINKING_BUDGET
+from config import GEMINI_API_KEY, MODELS_INFO
 
 
 class GeminiClient(BaseLLMClient):
@@ -22,18 +22,12 @@ class GeminiClient(BaseLLMClient):
         if model is None:
             model = MODELS_INFO["gemini"]["model"]
         
-        # Create thinking configuration
-        thinking_config = types.ThinkingConfig(thinking_budget=GEMINI_THINKING_BUDGET)
-        
         if system_prompt:
             config = types.GenerateContentConfig(
-                system_instruction=system_prompt,
-                thinking_config=thinking_config
+                system_instruction=system_prompt
             )
         else:
-            config = types.GenerateContentConfig(
-                thinking_config=thinking_config
-            )
+            config = types.GenerateContentConfig()
             
         response = self.client.models.generate_content(
             model=model,

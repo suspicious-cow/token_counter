@@ -52,7 +52,7 @@ MODELS_INFO = {
         # Cache expires ~5 minutes after last access, requires explicit cache control blocks
     },
     "grok": {
-        "model": "grok-2-public",  # Latest public non-reasoning model
+        "model": "grok-2",  # Base Grok-2 model
         "input_cost_per_million": 5.00,    # USD per 1M input tokens (updated pricing)
         "cached_input_cost_per_million": 1.25, # USD per 1M cached input tokens (75% discount)
         "output_cost_per_million": 15.00   # USD per 1M output tokens

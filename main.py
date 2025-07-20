@@ -395,7 +395,7 @@ def display_summary(df, log_failed_path=None):
         
         # Cost efficiency (output tokens per dollar)
         print("\nCost efficiency (output tokens per dollar):")
-        efficiency = successful_df.groupby('Vendor').apply(
+        efficiency = successful_df.groupby('Vendor', include_groups=False).apply(
             lambda x: x['Output Tokens'].sum() / x['Cost (USD)'].sum() if x['Cost (USD)'].sum() > 0 else 0
         ).round(0)
         for vendor, eff in efficiency.sort_values(ascending=False).items():
