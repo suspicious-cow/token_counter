@@ -247,13 +247,13 @@ python main.py --validate-only
 
 **Output example**:
 
-```markdown
-## API Key Validation Report:
-
-Openai ✅ Valid
-Gemini ✅ Valid
-Anthropic ❌ Invalid/Missing
-Grok ✅ Valid
+```
+API Key Validation Report:
+------------------------------
+Openai       ✅ Valid
+Gemini       ✅ Valid
+Anthropic    ❌ Invalid/Missing
+Grok         ✅ Valid
 
 Valid providers: 3/4
 ```
@@ -316,51 +316,60 @@ This ensures fair token count comparisons without hidden reasoning overhead that
 ## 💰 Pricing Configuration
 
 ### Centralized Pricing Management
+
 All pricing is configured in `config.py` under the `MODELS_INFO` dictionary - **not in individual client files**. This provides:
+
 - **Single source of truth** for all provider pricing
 - **Easy maintenance** - update prices in one location
 - **Consistent cost calculations** across all experiments
 
 ### Current Pricing (USD per 1M tokens)
-*Last updated: January 2025*
 
-| Provider | Model | Input | Cached Input | Output |
-|----------|-------|-------|--------------|--------|
-| OpenAI | gpt-4o | $2.50 | $1.25 (50% off) | $10.00 |
-| Gemini | gemini-2.5-flash | $0.30 | $0.075 (75% off) | $2.50 |
-| Anthropic | claude-3-5-sonnet-20241022 | $3.00 | $0.30 (90% off) | $15.00 |
-| Grok | grok-beta | $5.00 | $1.25 (75% off) | $15.00 |
+_Last updated: January 2025_
+
+| Provider  | Model                      | Input | Cached Input     | Output |
+| --------- | -------------------------- | ----- | ---------------- | ------ |
+| OpenAI    | gpt-4o                     | $2.50 | $1.25 (50% off)  | $10.00 |
+| Gemini    | gemini-2.5-flash           | $0.30 | $0.075 (75% off) | $2.50  |
+| Anthropic | claude-3-5-sonnet-20241022 | $3.00 | $0.30 (90% off)  | $15.00 |
+| Grok      | grok-beta                  | $5.00 | $1.25 (75% off)  | $15.00 |
 
 ### Caching Details by Provider
 
 #### OpenAI (gpt-4o)
+
 - **Discount**: 50% off cached input tokens
 - **Minimum**: 1024+ tokens required for caching
 - **Type**: Automatic prompt caching for repeated prefixes
 - **Management**: No explicit cache control needed
 
 #### Gemini (gemini-2.5-flash)
+
 - **Discount**: 75% off cached input tokens
 - **Minimum**: 32K+ tokens for explicit caching
 - **Type**: Both implicit (automatic) and explicit context caching
 - **Management**: Implicit caching occurs automatically
 
 #### Anthropic (claude-3-5-sonnet-20241022)
+
 - **Discount**: 90% off cache reads, 25% premium on cache writes
 - **Minimum**: 1024+ tokens required for caching
 - **Type**: Explicit prompt caching with cache control blocks
 - **Management**: Cache expires ~5 minutes after last access
 
 #### Grok (grok-beta)
+
 - **Discount**: 75% off cached input tokens
 - **Minimum**: No documented minimum (may cache very short prompts)
 - **Type**: Automatic prompt caching (OpenAI-compatible)
 - **Management**: Automatic for repeated prompt prefixes
 
 ### Updating Pricing
+
 To update pricing when providers change rates:
 
 1. **Edit `config.py`**:
+
    ```python
    MODELS_INFO = {
        "openai": {
@@ -377,10 +386,12 @@ To update pricing when providers change rates:
 3. **No client code changes needed** - pricing is automatically applied
 
 ### Cost Calculation Method
+
 The system calculates costs using official API token counts:
+
 ```
 uncached_input_cost = (total_input_tokens - cached_tokens) × input_rate
-cached_input_cost = cached_tokens × cached_input_rate  
+cached_input_cost = cached_tokens × cached_input_rate
 output_cost = output_tokens × output_rate
 total_cost = uncached_input_cost + cached_input_cost + output_cost
 ```
@@ -398,29 +409,29 @@ Each experiment now generates:
 
 ### New File Structure
 
-```markdown
-├── clients/ # Enhanced client architecture
-│ ├── base_client.py # Abstract base client
-│ ├── openai_client.py # Enhanced OpenAI client
-│ ├── gemini_client.py # Enhanced Gemini client
-│ ├── anthropic_client.py # Enhanced Anthropic client
-│ └── grok_client.py # Enhanced Grok client
-├── config/ # Configuration management
-│ └── validation.py # API key validation utilities
-├── utils/ # Utility modules
-│ ├── retry.py # Retry logic with backoff
-│ └── rate_limiter.py # Rate limiting utilities
-├── analytics/ # Advanced analytics
-│ └── analyzer.py # Comprehensive analysis tools
-├── cli/ # Interactive CLI
-│ └── interactive.py # Guided experiment setup
-├── tests/ # Test suite
-│ └── test_clients.py # Client testing
-├── examples/ # Demo and example scripts
-│ └── demo.py # Feature demonstration
-├── client_factory.py # Client factory pattern
-├── main.py # Main script (classic + enhanced modes)
-└── [other files...] # Configuration, requirements, etc.
+```
+├── clients/                   # Enhanced client architecture
+│   ├── base_client.py        # Abstract base client
+│   ├── openai_client.py      # Enhanced OpenAI client
+│   ├── gemini_client.py      # Enhanced Gemini client
+│   ├── anthropic_client.py   # Enhanced Anthropic client
+│   └── grok_client.py        # Enhanced Grok client
+├── config/                   # Configuration management
+│   └── validation.py         # API key validation utilities
+├── utils/                    # Utility modules
+│   ├── retry.py              # Retry logic with backoff
+│   └── rate_limiter.py       # Rate limiting utilities
+├── analytics/                # Advanced analytics
+│   └── analyzer.py           # Comprehensive analysis tools
+├── cli/                      # Interactive CLI
+│   └── interactive.py        # Guided experiment setup
+├── tests/                    # Test suite
+│   └── test_clients.py       # Client testing
+├── examples/                 # Demo and example scripts
+│   └── demo.py               # Feature demonstration
+├── client_factory.py         # Client factory pattern
+├── main.py                   # Main script (classic + enhanced modes)
+└── [other files...]          # Configuration, requirements, etc.
 ```
 
 ### Client Architecture
@@ -492,17 +503,17 @@ analyzer.generate_comprehensive_report()
 
 ### Sample Analytics Output
 
-```markdown
+```
 Token Efficiency (Output Tokens per Dollar):
-Gemini: 83,333 tokens/$
+  Gemini: 83,333 tokens/$
   OpenAI: 12,500 tokens/$
-Grok: 6,667 tokens/$w
+  Grok: 6,667 tokens/$
   Anthropic: 3,333 tokens/$
 
 Outlier Detection:
-High cost outliers: 2
-High token outliers: 1
-Unusual responses: 0
+  High cost outliers: 2
+  High token outliers: 1
+  Unusual responses: 0
 ```
 
 ## 🧪 Testing
