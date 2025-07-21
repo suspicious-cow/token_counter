@@ -300,9 +300,9 @@ This system is configured to avoid reasoning tokens that could skew token count 
 ### Model Selection
 
 - **OpenAI**: `gpt-4o` (non-reasoning model)
-- **Gemini**: `gemini-2.5-flash` with reasoning **disabled** (`thinking_budget=0`)
+- **Gemini**: `gemini-2.5-pro` (non-reasoning model with tiered pricing)
 - **Anthropic**: `claude-3-5-sonnet-20241022` (non-reasoning model)
-- **Grok**: `grok-beta` (non-reasoning model)
+- **Grok**: `grok-2` (non-reasoning model)
 
 ### Reasoning Configuration
 
@@ -330,9 +330,11 @@ _Last updated: January 2025_
 | Provider  | Model                      | Input | Cached Input     | Output |
 | --------- | -------------------------- | ----- | ---------------- | ------ |
 | OpenAI    | gpt-4o                     | $2.50 | $1.25 (50% off)  | $10.00 |
-| Gemini    | gemini-2.5-flash           | $0.30 | $0.075 (75% off) | $2.50  |
+| Gemini    | gemini-2.5-pro             | $1.25/$2.50* | $0.31/$0.63* (75% off) | $10.00/$15.00* |
 | Anthropic | claude-3-5-sonnet-20241022 | $3.00 | $0.30 (90% off)  | $15.00 |
-| Grok      | grok-beta                  | $5.00 | $1.25 (75% off)  | $15.00 |
+| Grok      | grok-2                     | $5.00 | $1.25 (75% off)  | $15.00 |
+
+*Gemini uses tiered pricing: lower rates for ≤200K tokens, higher rates for >200K tokens
 
 ### Caching Details by Provider
 
@@ -343,12 +345,15 @@ _Last updated: January 2025_
 - **Type**: Automatic prompt caching for repeated prefixes
 - **Management**: No explicit cache control needed
 
-#### Gemini (gemini-2.5-flash)
+#### Gemini (gemini-2.5-pro)
 
-- **Discount**: 75% off cached input tokens
+- **Tiered Pricing**: Different rates based on total token usage per request
+  - **≤200K tokens**: $1.25 input, $10.00 output (per 1M tokens)
+  - **>200K tokens**: $2.50 input, $15.00 output (per 1M tokens)
+- **Discount**: 75% off cached input tokens (applied to appropriate tier rate)
 - **Minimum**: 32K+ tokens for explicit caching
 - **Type**: Both implicit (automatic) and explicit context caching
-- **Management**: Implicit caching occurs automatically
+- **Management**: Automatic tier detection based on total tokens per request
 
 #### Anthropic (claude-3-5-sonnet-20241022)
 

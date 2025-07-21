@@ -24,6 +24,52 @@ from clients.anthropic_client import process_with_anthropic, get_model_name as g
 from clients.grok_client import process_with_grok, get_model_name as get_grok_model
 
 
+def calculate_gemini_tiered_cost(input_tokens, cached_tokens, output_tokens):
+    """
+    Calculate Gemini 2.5 Pro cost using tiered pricing structure.
+    
+    Args:
+        input_tokens: Total input tokens
+        cached_tokens: Cached input tokens  
+        output_tokens: Output tokens
+        
+    Returns:
+        tuple: (input_cost, cached_cost, output_cost, total_cost)
+    """
+    gemini_config = MODELS_INFO['gemini']
+    
+    # Check if this model uses tiered pricing
+    if not gemini_config.get('tiered_pricing', False):
+        # Fall back to simple pricing
+        regular_input_tokens = input_tokens - cached_tokens
+        input_cost = regular_input_tokens * gemini_config['input_cost_per_million'] / 1_000_000
+        cached_cost = cached_tokens * gemini_config['cached_input_cost_per_million'] / 1_000_000
+        output_cost = output_tokens * gemini_config['output_cost_per_million'] / 1_000_000
+        return input_cost, cached_cost, output_cost, input_cost + cached_cost + output_cost
+    
+    # Tiered pricing calculation
+    pricing_tiers = gemini_config['pricing_tiers']
+    threshold = pricing_tiers['threshold']
+    total_tokens = input_tokens + output_tokens
+    
+    # Determine which tier to use based on total token count
+    if total_tokens <= threshold:
+        # Low tier (<=200K tokens)
+        tier = pricing_tiers['low_tier']
+    else:
+        # High tier (>200K tokens)
+        tier = pricing_tiers['high_tier']
+    
+    # Calculate costs using the appropriate tier
+    regular_input_tokens = input_tokens - cached_tokens
+    input_cost = regular_input_tokens * tier['input_cost_per_million'] / 1_000_000
+    # For cached tokens, assume same discount rate as other providers (75%)
+    cached_cost = cached_tokens * (tier['input_cost_per_million'] * 0.25) / 1_000_000
+    output_cost = output_tokens * tier['output_cost_per_million'] / 1_000_000
+    
+    return input_cost, cached_cost, output_cost, input_cost + cached_cost + output_cost
+
+
 def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
     """
     Run a single trial across selected LLM providers.
@@ -98,12 +144,10 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             regular_input_tokens = total_input_tokens - cached_input_tokens
             output_tokens = out_tok or 0
             
-            # Cost calculation following Gemini's formula
-            regular_input_cost = regular_input_tokens * MODELS_INFO['gemini']['input_cost_per_million'] / 1_000_000
-            cached_input_cost = cached_input_tokens * MODELS_INFO['gemini']['cached_input_cost_per_million'] / 1_000_000
-            output_cost = output_tokens * MODELS_INFO['gemini']['output_cost_per_million'] / 1_000_000
-            # Note: Storage cost (H*S) not calculated since we don't have TTL info for implicit caching
-            total_cost = regular_input_cost + cached_input_cost + output_cost
+            # Cost calculation using tiered pricing
+            regular_input_cost, cached_input_cost, output_cost, total_cost = calculate_gemini_tiered_cost(
+                total_input_tokens, cached_input_tokens, output_tokens
+            )
             
             # Display detailed cost breakdown during run
             print(f"  ✅ Gemini:")

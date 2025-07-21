@@ -20,7 +20,7 @@ GROK_API_KEY = os.getenv("GROK_API_KEY", "your-grok-api-key")
 # Default prompts and settings
 DEFAULT_USER_PROMPT = "Give me the word 'halt' without any formatting or additional text."
 DEFAULT_SYSTEM_PROMPT = ""
-DEFAULT_NUM_TRIALS = 3
+DEFAULT_NUM_TRIALS = 1
 
 # Model and pricing information for cost calculations (USD per 1M tokens)
 # This is the single source of truth for both model names and pricing
@@ -28,20 +28,33 @@ DEFAULT_NUM_TRIALS = 3
 # Last updated: January 2025
 MODELS_INFO = {
     "openai": {
-        "model": "gpt-4o-2024-11-20",  # Latest GPT-4o model (November 2024)
+        "model": "gpt-4.1",  # Latest GPT-4o model (November 2024)
         "input_cost_per_million": 2.50,    # USD per 1M input tokens (gpt-4o pricing)
-        "cached_input_cost_per_million": 1.25, # USD per 1M cached input tokens (50% discount)
-        "output_cost_per_million": 10.00   # USD per 1M output tokens (gpt-4o pricing)
+        "cached_input_cost_per_million": .50, # USD per 1M cached input tokens (50% discount)
+        "output_cost_per_million": 8.00   # USD per 1M output tokens (gpt-4o pricing)
         # Note: OpenAI automatic prompt caching - 75% discount on cached input tokens (≥1024 tokens)
         # Caching is automatic for repeated prompt prefixes, no explicit cache management needed
     },
     "gemini": {
-        "model": "gemini-2.0-flash-exp",  # Latest Gemini 2.0 Flash (experimental)
-        "input_cost_per_million": 0.00,    # USD per 1M input tokens (currently free during preview)
-        "cached_input_cost_per_million": 0.00, # USD per 1M cached input tokens (currently free)
-        "output_cost_per_million": 0.00    # USD per 1M output tokens (currently free during preview)
-        # Note: Gemini 2.5 Flash supports context caching with 75% discount (≥32K tokens for explicit caching)
-        # Implicit caching may occur automatically for repeated content
+        "model": "gemini-2.5-pro",  # Gemini 2.5 Pro with tiered pricing
+        "tiered_pricing": True,  # Flag to indicate this uses tiered pricing
+        "pricing_tiers": {
+            "threshold": 200000,  # 200K tokens threshold
+            "low_tier": {  # <=200K tokens
+                "input_cost_per_million": 1.25,
+                "output_cost_per_million": 10.00
+            },
+            "high_tier": {  # >200K tokens
+                "input_cost_per_million": 2.50,
+                "output_cost_per_million": 15.00
+            }
+        },
+        # Fallback for backward compatibility (using low tier rates)
+        "input_cost_per_million": 1.25,
+        "cached_input_cost_per_million": 0.31,  # Assuming 75% discount like other providers
+        "output_cost_per_million": 10.00
+        # Note: Gemini 2.5 Pro has tiered pricing - rates increase after 200K tokens
+        # UI remains free of charge, API pricing shown above
     },
     "anthropic": {
         "model": "claude-3-5-sonnet-20241022",  # Latest Claude 3.5 Sonnet (New)
