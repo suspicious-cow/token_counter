@@ -16,7 +16,8 @@ import pandas as pd
 import argparse
 from config import (
     DEFAULT_USER_PROMPT, DEFAULT_SYSTEM_PROMPT, DEFAULT_NUM_TRIALS,
-    CSV_OUTPUT_PATH, CSV_COLUMNS, get_timestamped_filename, MODELS_INFO
+    CSV_OUTPUT_PATH, CSV_COLUMNS, get_timestamped_filename, MODELS_INFO,
+    ANTHROPIC_CACHE_TYPE
 )
 from clients.openai_client import process_with_openai, get_model_name as get_openai_model
 from clients.gemini_client import process_with_gemini, get_model_name as get_gemini_model
@@ -61,13 +62,57 @@ def calculate_gemini_tiered_cost(input_tokens, cached_tokens, output_tokens):
         tier = pricing_tiers['high_tier']
     
     # Calculate costs using the appropriate tier
-    regular_input_tokens = input_tokens - cached_tokens
-    input_cost = regular_input_tokens * tier['input_cost_per_million'] / 1_000_000
-    # For cached tokens, assume same discount rate as other providers (75%)
-    cached_cost = cached_tokens * (tier['input_cost_per_million'] * 0.25) / 1_000_000
+    # For Gemini 2.5 Pro: charge full price for all input tokens (no caching discount)
+    # but still track and display cached token counts when they appear
+    input_cost = input_tokens * tier['input_cost_per_million'] / 1_000_000
+    cached_cost = 0.0  # Unknown pricing for cached tokens (not documented by Google)
     output_cost = output_tokens * tier['output_cost_per_million'] / 1_000_000
     
     return input_cost, cached_cost, output_cost, input_cost + cached_cost + output_cost
+
+
+def calculate_anthropic_cache_cost(input_tokens, cache_creation_tokens, cache_read_tokens, output_tokens):
+    """
+    Calculate Anthropic cost using configured cache type (ephemeral or persistent).
+    
+    Args:
+        input_tokens: Total input tokens
+        cache_creation_tokens: Tokens used for cache creation
+        cache_read_tokens: Tokens read from cache
+        output_tokens: Output tokens
+        
+    Returns:
+        tuple: (regular_input_cost, cache_creation_cost, cache_read_cost, output_cost, total_cost)
+    """
+    anthropic_config = MODELS_INFO['anthropic']
+    cache_type = ANTHROPIC_CACHE_TYPE.lower()
+    
+    # Get cache pricing for the configured type
+    if cache_type in anthropic_config['cache_pricing']:
+        cache_config = anthropic_config['cache_pricing'][cache_type]
+    else:
+        # Fallback to ephemeral if invalid cache type
+        cache_config = anthropic_config['cache_pricing']['ephemeral']
+        print(f"Warning: Invalid cache type '{cache_type}', using ephemeral pricing")
+    
+    # Calculate regular input tokens (total - cache creation - cache read)
+    regular_input_tokens = max(input_tokens - cache_creation_tokens - cache_read_tokens, 0)
+    
+    # Base rate for calculations
+    base_rate = anthropic_config['input_cost_per_million'] / 1_000_000
+    
+    # Calculate costs using configured cache type
+    regular_input_cost = regular_input_tokens * base_rate
+    cache_creation_cost = cache_creation_tokens * base_rate * cache_config['cache_write_multiplier']
+    cache_read_cost = cache_read_tokens * base_rate * cache_config['cache_read_multiplier']
+    output_cost = output_tokens * anthropic_config['output_cost_per_million'] / 1_000_000
+    
+    # Note: Storage cost for persistent caching not implemented yet (requires time tracking)
+    # storage_cost = cache_creation_tokens * cache_config['storage_cost_per_million_per_hour'] / 1_000_000 * hours
+    
+    total_cost = regular_input_cost + cache_creation_cost + cache_read_cost + output_cost
+    
+    return regular_input_cost, cache_creation_cost, cache_read_cost, output_cost, total_cost
 
 
 def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
@@ -187,23 +232,24 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             })
     if 'anthropic' in vendors:
         try:
-            output, in_tok, cached_in_tok, out_tok = process_with_anthropic(prompt, system_prompt)
-            # Raw token counts - no calculations
+            output, in_tok, cache_creation_tok, cache_read_tok, out_tok = process_with_anthropic(prompt, system_prompt)
+            # Raw token counts from Claude API
             input_tokens = in_tok or 0
-            cached_input_tokens = int(cached_in_tok) if cached_in_tok is not None else 0
+            cache_creation_tokens = cache_creation_tok or 0
+            cache_read_tokens = cache_read_tok or 0
             output_tokens = out_tok or 0
             
-            # Cost calculation: uncached = total - cached, cached = cached
-            uncached_input = max(input_tokens - cached_input_tokens, 0)
-            input_token_cost = uncached_input * MODELS_INFO['anthropic']['input_cost_per_million'] / 1_000_000
-            cached_token_cost = cached_input_tokens * MODELS_INFO['anthropic']['cached_input_cost_per_million'] / 1_000_000
-            output_token_cost = output_tokens * MODELS_INFO['anthropic']['output_cost_per_million'] / 1_000_000
-            cost = input_token_cost + cached_token_cost + output_token_cost
+            # Use configured cache type for cost calculation
+            regular_input_cost, cache_creation_cost, cache_read_cost, output_token_cost, cost = calculate_anthropic_cache_cost(
+                input_tokens, cache_creation_tokens, cache_read_tokens, output_tokens
+            )
             
             # Display detailed cost breakdown during run
+            total_cached_tokens = cache_creation_tokens + cache_read_tokens
+            regular_input_tokens = max(input_tokens - cache_creation_tokens - cache_read_tokens, 0)
             print(f"  ✅ Anthropic:")
-            print(f"     Tokens: {input_tokens} total in ({uncached_input} uncached + {cached_input_tokens} cached) + {output_tokens} out")
-            print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + ${output_token_cost:.6f} output = ${cost:.6f} total")
+            print(f"     Tokens: {input_tokens} total in ({regular_input_tokens} regular + {cache_creation_tokens} cache-write + {cache_read_tokens} cache-read) + {output_tokens} out")
+            print(f"     Costs: ${regular_input_cost:.6f} regular + ${cache_creation_cost:.6f} cache-write + ${cache_read_cost:.6f} cache-read + ${output_token_cost:.6f} output = ${cost:.6f} total")
             
             results.append({
                 'Run Number': trial_number,
@@ -213,10 +259,10 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'System Prompt': system_prompt,
                 'Output': output,
                 'Input Tokens': input_tokens,
-                'Cached Input Tokens': cached_input_tokens,
+                'Cached Input Tokens': total_cached_tokens,
                 'Output Tokens': output_tokens,
-                'Input Token Cost (USD)': round(input_token_cost, 6),
-                'Cached Token Cost (USD)': round(cached_token_cost, 6),
+                'Input Token Cost (USD)': round(regular_input_cost, 6),
+                'Cached Token Cost (USD)': round(cache_creation_cost + cache_read_cost, 6),
                 'Output Token Cost (USD)': round(output_token_cost, 6),
                 'Cost (USD)': round(cost, 6)
             })

@@ -301,7 +301,7 @@ This system is configured to avoid reasoning tokens that could skew token count 
 
 - **OpenAI**: `gpt-4o` (non-reasoning model)
 - **Gemini**: `gemini-2.5-pro` (non-reasoning model with tiered pricing)
-- **Anthropic**: `claude-3-5-sonnet-20241022` (non-reasoning model)
+- **Anthropic**: `claude-sonnet-4-20250514` (non-reasoning model)
 - **Grok**: `grok-2` (non-reasoning model)
 
 ### Reasoning Configuration
@@ -331,10 +331,11 @@ _Last updated: January 2025_
 | --------- | -------------------------- | ----- | ---------------- | ------ |
 | OpenAI    | gpt-4o                     | $2.50 | $1.25 (50% off)  | $10.00 |
 | Gemini    | gemini-2.5-pro             | $1.25/$2.50* | $0.31/$0.63* (75% off) | $10.00/$15.00* |
-| Anthropic | claude-3-5-sonnet-20241022 | $3.00 | $0.30 (90% off)  | $15.00 |
+| Anthropic | claude-sonnet-4-20250514   | $3.00 | $0.30/$3.75/$6.00** | $15.00 |
 | Grok      | grok-2                     | $5.00 | $1.25 (75% off)  | $15.00 |
 
 *Gemini uses tiered pricing: lower rates for ≤200K tokens, higher rates for >200K tokens
+**Anthropic cache pricing: $0.30 cache reads, $3.75 ephemeral writes (5min), $6.00 persistent writes (1hr)
 
 ### Caching Details by Provider
 
@@ -350,17 +351,24 @@ _Last updated: January 2025_
 - **Tiered Pricing**: Different rates based on total token usage per request
   - **≤200K tokens**: $1.25 input, $10.00 output (per 1M tokens)
   - **>200K tokens**: $2.50 input, $15.00 output (per 1M tokens)
-- **Discount**: 75% off cached input tokens (applied to appropriate tier rate)
-- **Minimum**: 32K+ tokens for explicit caching
-- **Type**: Both implicit (automatic) and explicit context caching
+- **Caching**: Token counts displayed when available, but pricing unknown
+  - Google has not yet documented caching rates for Gemini 2.5 Pro
+  - Full input token price charged (no caching discount applied)
+  - Cached token costs shown as $0.00 (unknown pricing)
 - **Management**: Automatic tier detection based on total tokens per request
 
-#### Anthropic (claude-3-5-sonnet-20241022)
+#### Anthropic (claude-sonnet-4-20250514)
 
-- **Discount**: 90% off cache reads, 25% premium on cache writes
+- **Base Input**: $3.00 per 1M tokens for regular (non-cached) input
+- **Cache Types**: Configurable via `ANTHROPIC_CACHE_TYPE` setting
+  - **Ephemeral** (~5 min TTL): $3.75 per 1M cache writes (25% markup)
+  - **Persistent** (~1 hour TTL): $6.00 per 1M cache writes (100% markup)
+- **Cache Reads**: $0.30 per 1M tokens for both cache types (90% discount)
+- **Output**: $15.00 per 1M tokens (standard rate)
+- **Configuration**: Set `ANTHROPIC_CACHE_TYPE = "ephemeral"` or `"persistent"` in config.py
 - **Minimum**: 1024+ tokens required for caching
 - **Type**: Explicit prompt caching with cache control blocks
-- **Management**: Cache expires ~5 minutes after last access
+- **Cost Calculation**: Automatically uses correct pricing based on configured cache type
 
 #### Grok (grok-beta)
 

@@ -57,12 +57,25 @@ MODELS_INFO = {
         # UI remains free of charge, API pricing shown above
     },
     "anthropic": {
-        "model": "claude-3-5-sonnet-20241022",  # Latest Claude 3.5 Sonnet (New)
+        "model": "claude-sonnet-4-20250514",  # Claude Sonnet 4 (May 2025)
         "input_cost_per_million": 3.00,    # USD per 1M input tokens
-        "cached_input_cost_per_million": 0.30, # USD per 1M cached input tokens (90% discount for cache reads)
-        "output_cost_per_million": 15.00   # USD per 1M output tokens
-        # Note: Anthropic prompt caching - 90% discount on cache reads, 25% premium on cache writes (≥1024 tokens)
-        # Cache expires ~5 minutes after last access, requires explicit cache control blocks
+        "output_cost_per_million": 15.00,   # USD per 1M output tokens
+        "cache_pricing": {
+            "ephemeral": {  # ~5 minute TTL
+                "cache_write_multiplier": 1.25,  # $3.75 per 1M tokens (25% markup: $3.00 * 1.25)
+                "cache_read_multiplier": 0.10,   # $0.30 per 1M tokens (90% discount: $3.00 * 0.10)
+                "storage_cost_per_million_per_hour": 0.0  # No storage cost for ephemeral
+            },
+            "persistent": {  # ~1 hour TTL  
+                "cache_write_multiplier": 2.00,  # $6.00 per 1M tokens (1h cache writes)
+                "cache_read_multiplier": 0.10,   # $0.30 per 1M tokens (cache hits & refreshes)
+                "storage_cost_per_million_per_hour": 0.0  # Storage cost included in write price
+            }
+        },
+        # Fallback for backward compatibility (ephemeral rates)
+        "cached_input_cost_per_million": 0.30
+        # Note: Cache type controlled by ANTHROPIC_CACHE_TYPE config setting
+        # Pricing: Base $3.00, 5m writes $3.75, 1h writes $6.00, cache reads $0.30, output $15.00
     },
     "grok": {
         "model": "grok-2",  # Base Grok-2 model
@@ -104,6 +117,7 @@ CSV_COLUMNS = [
 
 # Anthropic specific settings
 ANTHROPIC_MAX_TOKENS = 1024
+ANTHROPIC_CACHE_TYPE = "ephemeral"  # Options: "ephemeral" (~5min TTL) or "persistent" (~1hr TTL)
 
 # Gemini specific settings
 GEMINI_THINKING_BUDGET = 0  # Set to 0 to disable internal reasoning, or higher values (up to 24576) to enable reasoning

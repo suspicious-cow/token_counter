@@ -35,12 +35,12 @@ class AnthropicClient(BaseLLMClient):
         input_tokens = getattr(message.usage, 'input_tokens', None)
         output_tokens = getattr(message.usage, 'output_tokens', None)
         
-        # Get caching-related tokens
+        # Get caching-related tokens - return separately for proper cost calculation
         cache_creation_tokens = getattr(message.usage, 'cache_creation_input_tokens', 0) or 0
         cache_read_tokens = getattr(message.usage, 'cache_read_input_tokens', 0) or 0
-        cached_input_tokens = cache_creation_tokens + cache_read_tokens
         
-        return output, input_tokens, cached_input_tokens, output_tokens
+        # Return cache creation and read tokens separately for accurate pricing
+        return output, input_tokens, cache_creation_tokens, cache_read_tokens, output_tokens
     
     def get_model_name(self) -> str:
         """Get the default model name for Anthropic"""
@@ -58,14 +58,14 @@ def process_with_anthropic(prompt, system_prompt, model=None):
         model (str): The model to use (defaults to config setting)
     
     Returns:
-        tuple: (output, input_tokens, cached_input_tokens, output_tokens)
+        tuple: (output, input_tokens, cache_creation_tokens, cache_read_tokens, output_tokens)
     """
     try:
         client = AnthropicClient()
-        response = client.process(prompt, system_prompt, model)
-        return response.output, response.usage.input_tokens, response.usage.cached_input_tokens, response.usage.output_tokens
+        output, input_tokens, cache_creation_tokens, cache_read_tokens, output_tokens = client._make_api_call(prompt, system_prompt, model)
+        return output, input_tokens, cache_creation_tokens, cache_read_tokens, output_tokens
     except Exception as e:
-        return f"Anthropic error: {str(e)}", None, 0, None
+        return f"Anthropic error: {str(e)}", None, 0, 0, None
 
 
 def get_model_name():
