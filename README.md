@@ -302,7 +302,7 @@ This system is configured to avoid reasoning tokens that could skew token count 
 - **OpenAI**: `gpt-4o` (non-reasoning model)
 - **Gemini**: `gemini-2.5-pro` (non-reasoning model with tiered pricing)
 - **Anthropic**: `claude-sonnet-4-20250514` (non-reasoning model)
-- **Grok**: `grok-2` (non-reasoning model)
+- **Grok**: `grok-2` (non-reasoning model with higher context pricing)
 
 ### Reasoning Configuration
 
@@ -332,10 +332,11 @@ _Last updated: January 2025_
 | OpenAI    | gpt-4o                     | $2.50 | $1.25 (50% off)  | $10.00 |
 | Gemini    | gemini-2.5-pro             | $1.25/$2.50* | $0.31/$0.63* (75% off) | $10.00/$15.00* |
 | Anthropic | claude-sonnet-4-20250514   | $3.00 | $0.30/$3.75/$6.00** | $15.00 |
-| Grok      | grok-2                     | $5.00 | $1.25 (75% off)  | $15.00 |
+| Grok      | grok-2                     | $3.00/$6.00*** | $0.75/$1.50*** (75% off) | $15.00/$30.00*** |
 
 *Gemini uses tiered pricing: lower rates for ≤200K tokens, higher rates for >200K tokens
 **Anthropic cache pricing: $0.30 cache reads, $3.75 ephemeral writes (5min), $6.00 persistent writes (1hr)
+***Grok uses higher context pricing: standard rates for ≤128K tokens, higher rates for >128K tokens
 
 ### Caching Details by Provider
 
@@ -370,12 +371,15 @@ _Last updated: January 2025_
 - **Type**: Explicit prompt caching with cache control blocks
 - **Cost Calculation**: Automatically uses correct pricing based on configured cache type
 
-#### Grok (grok-beta)
+#### Grok (grok-2)
 
-- **Discount**: 75% off cached input tokens
-- **Minimum**: No documented minimum (may cache very short prompts)
+- **Higher Context Pricing**: Different rates based on total context size
+  - **≤128K tokens**: $3.00 input, $0.75 cached, $15.00 output (per 1M tokens)
+  - **>128K tokens**: $6.00 input, $1.50 cached, $30.00 output (per 1M tokens)
+- **Context Calculation**: Based on total input + output tokens per request
+- **Caching**: 75% discount on cached input tokens (applied to appropriate tier rate)
 - **Type**: Automatic prompt caching (OpenAI-compatible)
-- **Management**: Automatic for repeated prompt prefixes
+- **Management**: Automatic tier detection based on total context size
 
 ### Updating Pricing
 

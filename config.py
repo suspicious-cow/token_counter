@@ -78,12 +78,27 @@ MODELS_INFO = {
         # Pricing: Base $3.00, 5m writes $3.75, 1h writes $6.00, cache reads $0.30, output $15.00
     },
     "grok": {
-        "model": "grok-2",  # Base Grok-2 model
-        "input_cost_per_million": 5.00,    # USD per 1M input tokens (updated pricing)
-        "cached_input_cost_per_million": 1.25, # USD per 1M cached input tokens (75% discount)
-        "output_cost_per_million": 15.00   # USD per 1M output tokens
-        # Note: Grok prompt caching - 75% discount on cached tokens, follows OpenAI-compatible format
-        # Automatic caching for repeated prompt prefixes, no minimum token requirement documented
+        "model": "grok-2",  # Latest Grok-2 model
+        "tiered_pricing": True,  # Flag to indicate this uses tiered pricing
+        "pricing_tiers": {
+            "threshold": 128000,  # 128K tokens threshold
+            "standard_tier": {  # ≤128K tokens
+                "input_cost_per_million": 3.00,
+                "cached_input_cost_per_million": 0.75,
+                "output_cost_per_million": 15.00
+            },
+            "higher_context_tier": {  # >128K tokens
+                "input_cost_per_million": 6.00,  # Estimated higher rate
+                "cached_input_cost_per_million": 1.50,  # Estimated higher rate
+                "output_cost_per_million": 30.00  # Estimated higher rate
+            }
+        },
+        # Fallback for backward compatibility (using standard tier rates)
+        "input_cost_per_million": 3.00,
+        "cached_input_cost_per_million": 0.75,
+        "output_cost_per_million": 15.00
+        # Note: Grok has tiered pricing - rates increase after 128K tokens
+        # Higher context pricing applies when total context exceeds 128K tokens
     }
 }
 

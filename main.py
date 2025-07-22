@@ -115,6 +115,51 @@ def calculate_anthropic_cache_cost(input_tokens, cache_creation_tokens, cache_re
     return regular_input_cost, cache_creation_cost, cache_read_cost, output_cost, total_cost
 
 
+def calculate_grok_tiered_cost(input_tokens, cached_tokens, output_tokens):
+    """
+    Calculate Grok cost using tiered pricing structure for higher context.
+    
+    Args:
+        input_tokens: Total input tokens
+        cached_tokens: Cached input tokens  
+        output_tokens: Output tokens
+        
+    Returns:
+        tuple: (input_cost, cached_cost, output_cost, total_cost)
+    """
+    grok_config = MODELS_INFO['grok']
+    
+    # Check if this model uses tiered pricing
+    if not grok_config.get('tiered_pricing', False):
+        # Fall back to simple pricing
+        regular_input_tokens = input_tokens - cached_tokens
+        input_cost = regular_input_tokens * grok_config['input_cost_per_million'] / 1_000_000
+        cached_cost = cached_tokens * grok_config['cached_input_cost_per_million'] / 1_000_000
+        output_cost = output_tokens * grok_config['output_cost_per_million'] / 1_000_000
+        return input_cost, cached_cost, output_cost, input_cost + cached_cost + output_cost
+    
+    # Tiered pricing calculation
+    pricing_tiers = grok_config['pricing_tiers']
+    threshold = pricing_tiers['threshold']
+    total_context_tokens = input_tokens + output_tokens  # Total context size
+    
+    # Determine which tier to use based on total context size
+    if total_context_tokens <= threshold:
+        # Standard tier (≤128K tokens)
+        tier = pricing_tiers['standard_tier']
+    else:
+        # Higher context tier (>128K tokens)
+        tier = pricing_tiers['higher_context_tier']
+    
+    # Calculate costs using the appropriate tier
+    regular_input_tokens = input_tokens - cached_tokens
+    input_cost = regular_input_tokens * tier['input_cost_per_million'] / 1_000_000
+    cached_cost = cached_tokens * tier['cached_input_cost_per_million'] / 1_000_000
+    output_cost = output_tokens * tier['output_cost_per_million'] / 1_000_000
+    
+    return input_cost, cached_cost, output_cost, input_cost + cached_cost + output_cost
+
+
 def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
     """
     Run a single trial across selected LLM providers.
@@ -290,14 +335,13 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             cached_input_tokens = int(cached_in_tok) if cached_in_tok is not None else 0
             output_tokens = out_tok or 0
             
-            # Cost calculation: uncached = total - cached, cached = cached
-            uncached_input = max(input_tokens - cached_input_tokens, 0)
-            input_token_cost = uncached_input * MODELS_INFO['grok']['input_cost_per_million'] / 1_000_000
-            cached_token_cost = cached_input_tokens * MODELS_INFO['grok']['cached_input_cost_per_million'] / 1_000_000
-            output_token_cost = output_tokens * MODELS_INFO['grok']['output_cost_per_million'] / 1_000_000
-            cost = input_token_cost + cached_token_cost + output_token_cost
+            # Use tiered pricing for cost calculation
+            input_token_cost, cached_token_cost, output_token_cost, cost = calculate_grok_tiered_cost(
+                input_tokens, cached_input_tokens, output_tokens
+            )
             
             # Display detailed cost breakdown during run
+            uncached_input = max(input_tokens - cached_input_tokens, 0)
             print(f"  ✅ Grok:")
             print(f"     Tokens: {input_tokens} total in ({uncached_input} uncached + {cached_input_tokens} cached) + {output_tokens} out")
             print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + ${output_token_cost:.6f} output = ${cost:.6f} total")
