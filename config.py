@@ -78,7 +78,7 @@ MODELS_INFO = {
         # Pricing: Base $3.00, 5m writes $3.75, 1h writes $6.00, cache reads $0.30, output $15.00
     },
     "grok": {
-        "model": "grok-2",  # Latest Grok-2 model
+        "model": "grok-4",  # Latest Grok-4 model
         "tiered_pricing": True,  # Flag to indicate this uses tiered pricing
         "pricing_tiers": {
             "threshold": 128000,  # 128K tokens threshold
