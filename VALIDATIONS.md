@@ -7,8 +7,8 @@ This document tracks validation of token counter pricing accuracy against actual
 | Provider | Status | Last Validated | Accuracy | Notes |
 |----------|--------|----------------|----------|-------|
 | OpenAI | ✅ Validated | 2025-01-27 | 100% | Perfect match with billing |
-| Gemini | ⚠️ Under Investigation | 2025-01-27 | Unknown | Significant discrepancy found |
-| Anthropic | 🔄 Pending | - | Unknown | Awaiting billing data |
+| Gemini | 📋 TBD | - | Unknown | Validation pending billing data review |
+| Anthropic | 📋 TBD | - | Unknown | Validation pending billing data review |
 | Grok | 🔄 Pending | - | Unknown | Awaiting billing data |
 
 ---
@@ -154,18 +154,26 @@ Confirmed token counter configuration matches Google's official Gemini 2.5 Pro p
 - [ ] Investigate token counting methodology differences
 - [ ] Consider adding adjustment factor or warning for Gemini costs
 
-### **Status:** ⚠️ **UNDER INVESTIGATION - Significant discrepancy requires further analysis**
+### **Status:** 📋 **TBD - Validation pending dedicated API key billing data**
+
+**Note**: Previous validation showed significant discrepancy, but this was with mixed API usage. Now using dedicated API keys from .env file for cleaner validation. Awaiting 24-48 hours for billing data to appear in Google Cloud Console.
 
 ---
 
-## Anthropic Validation 🔄
+## Anthropic Validation 📋
 
-### **Status:** Pending billing data collection
+### **Status:** TBD - Validation pending dedicated API key billing data
+
+**Current Situation:**
+- Now using dedicated API keys from .env file for clean billing isolation
+- Awaiting 24-48 hours for billing data to appear in Anthropic Console
+- Previous mixed usage made validation difficult
 
 **Next Steps:**
-- Collect Claude Sonnet 4 billing data for recent test runs
+- Collect Claude Sonnet 4 billing data from dedicated API key usage
 - Compare token counts and costs with actual billing
 - Verify cache pricing (ephemeral vs persistent) accuracy
+- Validate tiered pricing structure implementation
 
 ---
 
