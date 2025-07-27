@@ -19,8 +19,9 @@ try:
     # Look for .env file in the project root
     env_path = Path(__file__).parent / '.env'
     if env_path.exists():
-        load_dotenv(env_path)
-        print(f"Loaded environment variables from {env_path}")
+        # Use override=True to ensure .env file takes priority over OS environment variables
+        load_dotenv(env_path, override=True)
+        print(f"Loaded environment variables from {env_path} (overriding system variables)")
     else:
         print("No .env file found, using system environment variables")
         
