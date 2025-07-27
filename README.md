@@ -369,7 +369,7 @@ _Last updated: January 2025_
 
 | Provider  | Model                      | Input | Cached Input     | Output |
 | --------- | -------------------------- | ----- | ---------------- | ------ |
-| OpenAI    | gpt-4o                     | $2.00 | $1.00 (50% off)  | $8.00 |
+| OpenAI    | gpt-4.1                    | $2.00 | $1.00 (50% off)  | $8.00 |
 | Gemini    | gemini-2.5-pro             | $1.25/$2.50* | $0.31/$0.63* (75% off) | $10.00/$15.00* |
 | Anthropic | claude-sonnet-4-20250514   | $3.00 | $0.30/$3.75/$6.00** | $15.00 |
 | Grok      | grok-2                     | $3.00/$6.00*** | $0.75/$1.50*** (75% off) | $15.00/$30.00*** |
@@ -380,12 +380,28 @@ _Last updated: January 2025_
 
 ### Caching Details by Provider
 
-#### OpenAI (gpt-4o)
+#### OpenAI (gpt-4.1)
 
-- **Discount**: 50% off cached input tokens
-- **Minimum**: 1024+ tokens required for caching
+- **Base Pricing**: $2.00 input, $1.00 cached input (50% off), $8.00 output per 1M tokens
+- **Caching**: 50% off cached input tokens (≥1024 tokens, automatic)
 - **Type**: Automatic prompt caching for repeated prefixes
 - **Management**: No explicit cache control needed
+
+**Web Search Tool Calls:**
+- **Cost**: $25.00 per 1,000 calls (for gpt-4.1 and gpt-4.1-mini models)
+- **Search content tokens**: Included in the $25/1K calls cost (not charged separately)
+- **Billing**: Appears as 'web search tool calls | gpt-4o' in dashboard
+
+**⚠️ Important Web Search Billing Behavior:**
+- **Hidden sub-searches**: Each web search tool call can trigger multiple internal sub-searches
+- **Billing per sub-search**: You're charged for each internal sub-search, not just the visible call
+- **Unpredictable costs**: One tool call might generate 2-5+ billable sub-searches behind the scenes
+- **Dashboard limitation**: Usage dashboard only shows tool invocations, not internal sub-searches
+- **Cost impact**: Actual costs can be 2-3x higher than expected based on visible tool calls
+
+**Example**: 57 visible web search calls → 147 actual billable sub-searches (2.6x multiplier)
+
+**Note**: Only applies when using built-in web search tools, not standard API calls
 
 #### Gemini (gemini-2.5-pro)
 
