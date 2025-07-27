@@ -222,4 +222,57 @@ Confirmed token counter configuration matches Google's official Gemini 2.5 Pro p
 - **Configuration updates:** Any pricing changes must be reflected in config.py and README.md
 - **User communication:** Significant discrepancies should be noted in documentation with warnings
 
+---
+
+## TODO - Future Validation Tasks
+
+### **High Priority**
+
+- [ ] **OpenAI Web Search Tool Validation**
+  - Test web search tool calls with known prompts
+  - Measure actual vs expected costs (sub-search multiplier effect)
+  - Document cost multiplier patterns (2-5x+ billing)
+  - Validate billing dashboard reporting vs actual charges
+  - **Goal**: Understand and document unpredictable web search costs
+
+### **Medium Priority**
+
+- [ ] **Gemini Tiered Pricing Edge Cases**
+  - Test requests exactly at 200K token threshold
+  - Validate tier switching behavior
+  - Test with mixed input/output token distributions
+
+- [ ] **Anthropic Cache Type Comparison**
+  - Compare ephemeral vs persistent cache costs
+  - Validate storage cost calculations (when implemented)
+  - Test cache TTL behavior and billing impact
+
+- [ ] **Grok Higher Context Validation**
+  - Test requests exactly at 128K token threshold
+  - Validate higher context pricing activation
+  - Compare standard vs higher context billing
+
+### **Low Priority**
+
+- [ ] **Cross-Provider Token Counting**
+  - Compare tokenization differences between providers
+  - Document any systematic counting variations
+  - Test with various prompt types (code, multilingual, etc.)
+
+- [ ] **Rate Limiting Impact**
+  - Test if rate limiting affects token counting accuracy
+  - Validate retry logic doesn't double-count tokens
+
+### **Research Tasks**
+
+- [ ] **Provider Billing Delay Patterns**
+  - Document actual billing delay times per provider
+  - Identify optimal validation timing windows
+
+- [ ] **Caching Behavior Analysis**
+  - Test cache hit rates across different prompt patterns
+  - Validate cache expiration timing
+
+---
+
 Last updated: January 27, 2025
