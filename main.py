@@ -28,17 +28,17 @@ from clients.grok_client import process_with_grok, get_model_name as get_grok_mo
 def calculate_gemini_tiered_cost(input_tokens, cached_tokens, output_tokens):
     """
     Calculate Gemini 2.5 Pro cost using tiered pricing structure.
-    
+
     Args:
         input_tokens: Total input tokens
-        cached_tokens: Cached input tokens  
+        cached_tokens: Cached input tokens
         output_tokens: Output tokens
-        
+
     Returns:
         tuple: (input_cost, cached_cost, output_cost, total_cost)
     """
     gemini_config = MODELS_INFO['gemini']
-    
+
     # Check if this model uses tiered pricing
     if not gemini_config.get('tiered_pricing', False):
         # Fall back to simple pricing
@@ -192,8 +192,10 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             
             # Display detailed cost breakdown during run
             print(f"  ✅ OpenAI:")
-            print(f"     Tokens: {input_tokens} total in ({uncached_input} uncached + {cached_input_tokens} cached) + {output_tokens} out")
-            print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + ${output_token_cost:.6f} output = ${cost:.6f} total")
+            print(f"     Tokens: {input_tokens} total in ({uncached_input} uncached + "
+                  f"{cached_input_tokens} cached) + {output_tokens} out")
+            print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + "
+                  f"${output_token_cost:.6f} output = ${cost:.6f} total")
             
             results.append({
                 'Run Number': trial_number,
@@ -241,8 +243,10 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             
             # Display detailed cost breakdown during run
             print(f"  ✅ Gemini:")
-            print(f"     Tokens: {total_input_tokens} total in ({regular_input_tokens} uncached + {cached_input_tokens} cached) + {output_tokens} out")
-            print(f"     Costs: ${regular_input_cost:.6f} uncached + ${cached_input_cost:.6f} cached + ${output_cost:.6f} output = ${total_cost:.6f} total")
+            print(f"     Tokens: {total_input_tokens} total in ({regular_input_tokens} uncached + "
+                  f"{cached_input_tokens} cached) + {output_tokens} out")
+            print(f"     Costs: ${regular_input_cost:.6f} uncached + ${cached_input_cost:.6f} cached + "
+                  f"${output_cost:.6f} output = ${total_cost:.6f} total")
             
             results.append({
                 'Run Number': trial_number,
@@ -293,8 +297,10 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             total_cached_tokens = cache_creation_tokens + cache_read_tokens
             regular_input_tokens = max(input_tokens - cache_creation_tokens - cache_read_tokens, 0)
             print(f"  ✅ Anthropic:")
-            print(f"     Tokens: {input_tokens} total in ({regular_input_tokens} regular + {cache_creation_tokens} cache-write + {cache_read_tokens} cache-read) + {output_tokens} out")
-            print(f"     Costs: ${regular_input_cost:.6f} regular + ${cache_creation_cost:.6f} cache-write + ${cache_read_cost:.6f} cache-read + ${output_token_cost:.6f} output = ${cost:.6f} total")
+            print(f"     Tokens: {input_tokens} total in ({regular_input_tokens} regular + "
+                  f"{cache_creation_tokens} cache-write + {cache_read_tokens} cache-read) + {output_tokens} out")
+            print(f"     Costs: ${regular_input_cost:.6f} regular + ${cache_creation_cost:.6f} cache-write + "
+                  f"${cache_read_cost:.6f} cache-read + ${output_token_cost:.6f} output = ${cost:.6f} total")
             
             results.append({
                 'Run Number': trial_number,
@@ -343,8 +349,10 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             # Display detailed cost breakdown during run
             uncached_input = max(input_tokens - cached_input_tokens, 0)
             print(f"  ✅ Grok:")
-            print(f"     Tokens: {input_tokens} total in ({uncached_input} uncached + {cached_input_tokens} cached) + {output_tokens} out")
-            print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + ${output_token_cost:.6f} output = ${cost:.6f} total")
+            print(f"     Tokens: {input_tokens} total in ({uncached_input} uncached + "
+                  f"{cached_input_tokens} cached) + {output_tokens} out")
+            print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + "
+                  f"${output_token_cost:.6f} output = ${cost:.6f} total")
             
             results.append({
                 'Run Number': trial_number,
@@ -648,7 +656,8 @@ Examples:
                 # Enhanced mode uses the same runner but with additional features
                 user_prompt = args.prompt if args.prompt is not None else DEFAULT_USER_PROMPT
                 system_prompt = args.system if args.system is not None else DEFAULT_SYSTEM_PROMPT
-                output_file = args.output if args.output is not None else get_timestamped_filename(base_name="api_raw_enhanced")
+                output_file = (args.output if args.output is not None 
+                              else get_timestamped_filename(base_name="api_raw_enhanced"))
                 vendors = [v.strip().lower() for v in args.vendors.split(',')] if args.vendors else None
                 
                 print("Enhanced features: rate limiting, retry logic, advanced analytics enabled")
@@ -687,7 +696,8 @@ Examples:
     system_prompt = args.system if args.system is not None else DEFAULT_SYSTEM_PROMPT
     
     # Generate timestamped filename in outputs/ if no output specified
-    output_file = args.output if args.output is not None else get_timestamped_filename(base_name="api_raw")
+    output_file = (args.output if args.output is not None 
+                   else get_timestamped_filename(base_name="api_raw"))
     # Also generate a log file for failed calls
     log_failed_path = output_file.replace('.csv', '_failed.log')
     # Generate summary file name

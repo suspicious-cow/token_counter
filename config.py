@@ -125,7 +125,10 @@ TIMEZONE = os.getenv("TOKEN_COUNTER_TIMEZONE", "America/Chicago")  # Change to y
 
 # Output settings
 def get_timestamped_filename(base_name="api_results", extension="csv"):
-    """Generate a timestamped filename for the current run in the outputs/ folder, using 24-hour time and configured timezone, with timezone abbreviation in the filename."""
+    """Generate a timestamped filename for the current run in the outputs/ folder.
+    
+    Uses 24-hour time and configured timezone, with timezone abbreviation in the filename.
+    """
     try:
         tz = ZoneInfo(TIMEZONE)
     except Exception:
