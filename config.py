@@ -29,7 +29,7 @@ DEFAULT_NUM_TRIALS = 1
 MODELS_INFO = {
     "openai": {
         "model": "gpt-4.1",  # Latest GPT-4o model (November 2024)
-        "input_cost_per_million": 2.50,    # USD per 1M input tokens (gpt-4o pricing)
+        "input_cost_per_million": 2.00,    # USD per 1M input tokens (verified from actual billing)
         "cached_input_cost_per_million": .50, # USD per 1M cached input tokens (50% discount)
         "output_cost_per_million": 8.00   # USD per 1M output tokens (gpt-4o pricing)
         # Note: OpenAI automatic prompt caching - 75% discount on cached input tokens (≥1024 tokens)
