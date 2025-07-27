@@ -71,6 +71,55 @@ def calculate_gemini_tiered_cost(input_tokens, cached_tokens, output_tokens):
     return input_cost, cached_cost, output_cost, input_cost + cached_cost + output_cost
 
 
+def calculate_gemini_tiered_cost_with_reasoning(input_tokens, cached_tokens, output_tokens, reasoning_tokens):
+    """
+    Calculate Gemini 2.5 Pro cost using tiered pricing structure including reasoning tokens.
+    
+    Args:
+        input_tokens: Total input tokens
+        cached_tokens: Cached input tokens
+        output_tokens: Output tokens
+        reasoning_tokens: Hidden reasoning tokens (if any)
+        
+    Returns:
+        tuple: (input_cost, cached_cost, output_cost, reasoning_cost, total_cost)
+    """
+    gemini_config = MODELS_INFO['gemini']
+
+    # Check if this model uses tiered pricing
+    if not gemini_config.get('tiered_pricing', False):
+        # Fall back to simple pricing
+        regular_input_tokens = input_tokens - cached_tokens
+        input_cost = regular_input_tokens * gemini_config['input_cost_per_million'] / 1_000_000
+        cached_cost = cached_tokens * gemini_config['cached_input_cost_per_million'] / 1_000_000
+        output_cost = output_tokens * gemini_config['output_cost_per_million'] / 1_000_000
+        reasoning_cost = reasoning_tokens * gemini_config['output_cost_per_million'] / 1_000_000  # Reasoning charged at output rate
+        return input_cost, cached_cost, output_cost, reasoning_cost, input_cost + cached_cost + output_cost + reasoning_cost
+
+    # Tiered pricing calculation
+    pricing_tiers = gemini_config['pricing_tiers']
+    threshold = pricing_tiers['threshold']
+    total_tokens = input_tokens + output_tokens + reasoning_tokens
+
+    # Determine which tier to use based on total token count
+    if total_tokens <= threshold:
+        # Low tier (≤200K tokens)
+        tier = pricing_tiers['low_tier']
+    else:
+        # High tier (>200K tokens)
+        tier = pricing_tiers['high_tier']
+
+    # Calculate costs using the appropriate tier
+    # For Gemini 2.5 Pro: charge full price for all input tokens (no caching discount)
+    # but still track and display cached token counts when they appear
+    input_cost = input_tokens * tier['input_cost_per_million'] / 1_000_000
+    cached_cost = 0.0  # Unknown pricing for cached tokens (not documented by Google)
+    output_cost = output_tokens * tier['output_cost_per_million'] / 1_000_000
+    reasoning_cost = reasoning_tokens * tier['output_cost_per_million'] / 1_000_000  # Reasoning charged at output rate
+
+    return input_cost, cached_cost, output_cost, reasoning_cost, input_cost + cached_cost + output_cost + reasoning_cost
+
+
 def calculate_anthropic_cache_cost(input_tokens, cache_creation_tokens, cache_read_tokens, output_tokens):
     """
     Calculate Anthropic cost using configured cache type (ephemeral or persistent).
@@ -282,23 +331,31 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
             })
     if 'gemini' in vendors:
         try:
-            output, in_tok, cached_in_tok, out_tok = process_with_gemini(prompt, system_prompt)
+            output, in_tok, cached_in_tok, out_tok, reasoning_tok = process_with_gemini(prompt, system_prompt)
             total_input_tokens = in_tok or 0
             cached_input_tokens = cached_in_tok or 0
             regular_input_tokens = total_input_tokens - cached_input_tokens
             output_tokens = out_tok or 0
+            reasoning_tokens = reasoning_tok or 0
             
-            # Cost calculation using tiered pricing
-            regular_input_cost, cached_input_cost, output_cost, total_cost = calculate_gemini_tiered_cost(
-                total_input_tokens, cached_input_tokens, output_tokens
+            # Cost calculation using tiered pricing INCLUDING reasoning tokens
+            regular_input_cost, cached_input_cost, output_cost, reasoning_cost, total_cost = calculate_gemini_tiered_cost_with_reasoning(
+                total_input_tokens, cached_input_tokens, output_tokens, reasoning_tokens
             )
             
             # Display detailed cost breakdown during run
+            total_billable_tokens = total_input_tokens + output_tokens + reasoning_tokens
             print(f"  ✅ Gemini:")
-            print(f"     Tokens: {total_input_tokens} total in ({regular_input_tokens} uncached + "
-                  f"{cached_input_tokens} cached) + {output_tokens} out")
-            print(f"     Costs: ${regular_input_cost:.6f} uncached + ${cached_input_cost:.6f} cached + "
-                  f"${output_cost:.6f} output = ${total_cost:.6f} total")
+            if reasoning_tokens > 0:
+                print(f"     Tokens: {total_billable_tokens} total ({regular_input_tokens} uncached + "
+                      f"{cached_input_tokens} cached + {output_tokens} output + {reasoning_tokens} reasoning)")
+                print(f"     Costs: ${regular_input_cost:.6f} uncached + ${cached_input_cost:.6f} cached + "
+                      f"${output_cost:.6f} output + ${reasoning_cost:.6f} reasoning = ${total_cost:.6f} total")
+            else:
+                print(f"     Tokens: {total_input_tokens} total in ({regular_input_tokens} uncached + "
+                      f"{cached_input_tokens} cached) + {output_tokens} out")
+                print(f"     Costs: ${regular_input_cost:.6f} uncached + ${cached_input_cost:.6f} cached + "
+                      f"${output_cost:.6f} output = ${total_cost:.6f} total")
             
             results.append({
                 'Run Number': trial_number,
@@ -310,11 +367,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Input Tokens': total_input_tokens,
                 'Cached Input Tokens': cached_input_tokens,
                 'Output Tokens': output_tokens,
-                'Reasoning Tokens': 0,  # Gemini doesn't use reasoning tokens
+                'Reasoning Tokens': reasoning_tokens,  # Now tracking Gemini reasoning tokens
                 'Input Token Cost (USD)': round(regular_input_cost, 6),
                 'Cached Token Cost (USD)': round(cached_input_cost, 6),
                 'Output Token Cost (USD)': round(output_cost, 6),
-                'Reasoning Token Cost (USD)': 0.0,  # No reasoning cost for Gemini
+                'Reasoning Token Cost (USD)': round(reasoning_cost, 6),  # Now tracking reasoning cost
                 'Cost (USD)': round(total_cost, 6)
             })
         except Exception as e:

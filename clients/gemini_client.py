@@ -40,12 +40,23 @@ class GeminiClient(BaseLLMClient):
         input_tokens = usage.prompt_token_count if usage and hasattr(usage, 'prompt_token_count') else None
         output_tokens = usage.candidates_token_count if usage and hasattr(usage, 'candidates_token_count') else None
         
+
+        
         # Check for cached token information
         cached_input_tokens = 0
         if usage and hasattr(usage, 'cached_content_token_count'):
             cached_input_tokens = usage.cached_content_token_count or 0
         
-        return output, input_tokens, cached_input_tokens, output_tokens
+        # Look for reasoning tokens (found in thoughts_token_count!)
+        reasoning_tokens = 0
+        if usage:
+            # Check various possible field names for reasoning tokens
+            reasoning_tokens = (getattr(usage, 'thoughts_token_count', 0) or
+                              getattr(usage, 'reasoning_tokens', 0) or 
+                              getattr(usage, 'thinking_tokens', 0) or
+                              getattr(usage, 'reasoning_token_count', 0) or 0)
+        
+        return output, input_tokens, cached_input_tokens, output_tokens, reasoning_tokens
     
     def get_model_name(self) -> str:
         """Get the default model name for Gemini"""
@@ -63,14 +74,14 @@ def process_with_gemini(prompt, system_prompt, model=None):
         model (str): The model to use (defaults to config setting)
     
     Returns:
-        tuple: (output, input_tokens, cached_input_tokens, output_tokens)
+        tuple: (output, input_tokens, cached_input_tokens, output_tokens, reasoning_tokens)
     """
     try:
         client = GeminiClient()
-        response = client.process(prompt, system_prompt, model)
-        return response.output, response.usage.input_tokens, response.usage.cached_input_tokens, response.usage.output_tokens
+        output, input_tokens, cached_tokens, output_tokens, reasoning_tokens = client._make_api_call(prompt, system_prompt, model)
+        return output, input_tokens, cached_tokens, output_tokens, reasoning_tokens
     except Exception as e:
-        return f"Gemini error: {str(e)}", None, None, None
+        return f"Gemini error: {str(e)}", None, 0, None, 0
 
 
 def get_model_name():
