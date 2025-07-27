@@ -141,8 +141,8 @@ def get_timestamped_filename(base_name="api_results", extension="csv"):
 CSV_OUTPUT_PATH = "api_results.csv"  # Default fallback, usually overridden with timestamp
 CSV_COLUMNS = [
     'Run Number', 'Vendor', 'Model', 'User Prompt', 
-    'System Prompt', 'Output', 'Input Tokens', 'Cached Input Tokens', 'Output Tokens',
-    'Input Token Cost (USD)', 'Cached Token Cost (USD)', 'Output Token Cost (USD)', 'Cost (USD)'
+    'System Prompt', 'Output', 'Input Tokens', 'Cached Input Tokens', 'Output Tokens', 'Reasoning Tokens',
+    'Input Token Cost (USD)', 'Cached Token Cost (USD)', 'Output Token Cost (USD)', 'Reasoning Token Cost (USD)', 'Cost (USD)'
 ]
 
 # Note: For providers with caching (OpenAI, Gemini, Anthropic, Grok):

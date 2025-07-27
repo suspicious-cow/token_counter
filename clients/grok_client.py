@@ -45,7 +45,14 @@ class GrokClient(BaseLLMClient):
             completion.usage.prompt_tokens_details):
             cached_tokens = getattr(completion.usage.prompt_tokens_details, 'cached_tokens', 0) or 0
         
-        return output, input_tokens, cached_tokens, output_tokens
+        # BREAKTHROUGH: Get reasoning tokens from completion_tokens_details!
+        reasoning_tokens = 0
+        if (hasattr(completion, 'usage') and completion.usage and 
+            hasattr(completion.usage, 'completion_tokens_details') and 
+            completion.usage.completion_tokens_details):
+            reasoning_tokens = getattr(completion.usage.completion_tokens_details, 'reasoning_tokens', 0) or 0
+        
+        return output, input_tokens, cached_tokens, output_tokens, reasoning_tokens
     
     def get_model_name(self) -> str:
         """Get the default model name for Grok"""
@@ -63,14 +70,14 @@ def process_with_grok(prompt, system_prompt, model=None):
         model (str): The model to use (defaults to config setting)
     
     Returns:
-        tuple: (output, input_tokens, cached_input_tokens, output_tokens)
+        tuple: (output, input_tokens, cached_input_tokens, output_tokens, reasoning_tokens)
     """
     try:
         client = GrokClient()
-        response = client.process(prompt, system_prompt, model)
-        return response.output, response.usage.input_tokens, response.usage.cached_input_tokens, response.usage.output_tokens
+        output, input_tokens, cached_tokens, output_tokens, reasoning_tokens = client._make_api_call(prompt, system_prompt, model)
+        return output, input_tokens, cached_tokens, output_tokens, reasoning_tokens
     except Exception as e:
-        return f"Grok error: {str(e)}", None, 0, None
+        return f"Grok error: {str(e)}", None, 0, None, 0
 
 
 def get_model_name():

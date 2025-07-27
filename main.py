@@ -160,6 +160,54 @@ def calculate_grok_tiered_cost(input_tokens, cached_tokens, output_tokens):
     return input_cost, cached_cost, output_cost, input_cost + cached_cost + output_cost
 
 
+def calculate_grok_tiered_cost_with_reasoning(input_tokens, cached_tokens, output_tokens, reasoning_tokens):
+    """
+    Calculate Grok cost using tiered pricing structure including reasoning tokens.
+    
+    Args:
+        input_tokens: Total input tokens
+        cached_tokens: Cached input tokens
+        output_tokens: Output tokens
+        reasoning_tokens: Hidden reasoning tokens (charged at output rate)
+        
+    Returns:
+        tuple: (input_cost, cached_cost, output_cost, reasoning_cost, total_cost)
+    """
+    grok_config = MODELS_INFO['grok']
+    
+    # Check if this model uses tiered pricing
+    if not grok_config.get('tiered_pricing', False):
+        # Fall back to simple pricing
+        regular_input_tokens = input_tokens - cached_tokens
+        input_cost = regular_input_tokens * grok_config['input_cost_per_million'] / 1_000_000
+        cached_cost = cached_tokens * grok_config['cached_input_cost_per_million'] / 1_000_000
+        output_cost = output_tokens * grok_config['output_cost_per_million'] / 1_000_000
+        reasoning_cost = reasoning_tokens * grok_config['output_cost_per_million'] / 1_000_000  # Reasoning charged at output rate
+        return input_cost, cached_cost, output_cost, reasoning_cost, input_cost + cached_cost + output_cost + reasoning_cost
+
+    # Tiered pricing calculation
+    pricing_tiers = grok_config['pricing_tiers']
+    threshold = pricing_tiers['threshold']
+    total_context_tokens = input_tokens + output_tokens + reasoning_tokens  # Include reasoning in context calculation
+
+    # Determine which tier to use based on total context size
+    if total_context_tokens <= threshold:
+        # Standard tier (≤128K tokens)
+        tier = pricing_tiers['standard_tier']
+    else:
+        # Higher context tier (>128K tokens)
+        tier = pricing_tiers['higher_context_tier']
+
+    # Calculate costs using the appropriate tier
+    regular_input_tokens = input_tokens - cached_tokens
+    input_cost = regular_input_tokens * tier['input_cost_per_million'] / 1_000_000
+    cached_cost = cached_tokens * tier['cached_input_cost_per_million'] / 1_000_000
+    output_cost = output_tokens * tier['output_cost_per_million'] / 1_000_000
+    reasoning_cost = reasoning_tokens * tier['output_cost_per_million'] / 1_000_000  # Reasoning charged at output rate
+
+    return input_cost, cached_cost, output_cost, reasoning_cost, input_cost + cached_cost + output_cost + reasoning_cost
+
+
 def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
     """
     Run a single trial across selected LLM providers.
@@ -207,9 +255,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Input Tokens': input_tokens,
                 'Cached Input Tokens': cached_input_tokens,
                 'Output Tokens': output_tokens,
+                'Reasoning Tokens': 0,  # OpenAI doesn't use reasoning tokens
                 'Input Token Cost (USD)': round(input_token_cost, 6),
                 'Cached Token Cost (USD)': round(cached_token_cost, 6),
                 'Output Token Cost (USD)': round(output_token_cost, 6),
+                'Reasoning Token Cost (USD)': 0.0,  # No reasoning cost for OpenAI
                 'Cost (USD)': round(cost, 6)
             })
         except Exception as e:
@@ -223,9 +273,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Input Tokens': None,
                 'Cached Input Tokens': 0,
                 'Output Tokens': None,
+                'Reasoning Tokens': 0,
                 'Input Token Cost (USD)': None,
                 'Cached Token Cost (USD)': None,
                 'Output Token Cost (USD)': None,
+                'Reasoning Token Cost (USD)': None,
                 'Cost (USD)': None
             })
     if 'gemini' in vendors:
@@ -258,9 +310,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Input Tokens': total_input_tokens,
                 'Cached Input Tokens': cached_input_tokens,
                 'Output Tokens': output_tokens,
+                'Reasoning Tokens': 0,  # Gemini doesn't use reasoning tokens
                 'Input Token Cost (USD)': round(regular_input_cost, 6),
                 'Cached Token Cost (USD)': round(cached_input_cost, 6),
                 'Output Token Cost (USD)': round(output_cost, 6),
+                'Reasoning Token Cost (USD)': 0.0,  # No reasoning cost for Gemini
                 'Cost (USD)': round(total_cost, 6)
             })
         except Exception as e:
@@ -274,9 +328,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Input Tokens': None,
                 'Cached Input Tokens': 0,
                 'Output Tokens': None,
+                'Reasoning Tokens': 0,
                 'Input Token Cost (USD)': None,
                 'Cached Token Cost (USD)': None,
                 'Output Token Cost (USD)': None,
+                'Reasoning Token Cost (USD)': None,
                 'Cost (USD)': None
             })
     if 'anthropic' in vendors:
@@ -312,9 +368,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Input Tokens': input_tokens,
                 'Cached Input Tokens': total_cached_tokens,
                 'Output Tokens': output_tokens,
+                'Reasoning Tokens': 0,  # Anthropic doesn't use reasoning tokens
                 'Input Token Cost (USD)': round(regular_input_cost, 6),
                 'Cached Token Cost (USD)': round(cache_creation_cost + cache_read_cost, 6),
                 'Output Token Cost (USD)': round(output_token_cost, 6),
+                'Reasoning Token Cost (USD)': 0.0,  # No reasoning cost for Anthropic
                 'Cost (USD)': round(cost, 6)
             })
         except Exception as e:
@@ -328,31 +386,36 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Input Tokens': None,
                 'Cached Input Tokens': 0,
                 'Output Tokens': None,
+                'Reasoning Tokens': 0,
                 'Input Token Cost (USD)': None,
                 'Cached Token Cost (USD)': None,
                 'Output Token Cost (USD)': None,
+                'Reasoning Token Cost (USD)': None,
                 'Cost (USD)': None
             })
     if 'grok' in vendors:
         try:
-            output, in_tok, cached_in_tok, out_tok = process_with_grok(prompt, system_prompt)
+            output, in_tok, cached_in_tok, out_tok, reasoning_tok = process_with_grok(prompt, system_prompt)
             # Raw token counts - no calculations
             input_tokens = in_tok or 0
             cached_input_tokens = int(cached_in_tok) if cached_in_tok is not None else 0
             output_tokens = out_tok or 0
+            reasoning_tokens = reasoning_tok or 0
             
-            # Use tiered pricing for cost calculation
-            input_token_cost, cached_token_cost, output_token_cost, cost = calculate_grok_tiered_cost(
-                input_tokens, cached_input_tokens, output_tokens
+            # Use tiered pricing for cost calculation INCLUDING reasoning tokens
+            input_token_cost, cached_token_cost, output_token_cost, reasoning_token_cost, cost = calculate_grok_tiered_cost_with_reasoning(
+                input_tokens, cached_input_tokens, output_tokens, reasoning_tokens
             )
             
             # Display detailed cost breakdown during run
             uncached_input = max(input_tokens - cached_input_tokens, 0)
+            total_visible_tokens = input_tokens + output_tokens
+            total_billable_tokens = input_tokens + output_tokens + reasoning_tokens
             print(f"  ✅ Grok:")
-            print(f"     Tokens: {input_tokens} total in ({uncached_input} uncached + "
-                  f"{cached_input_tokens} cached) + {output_tokens} out")
+            print(f"     Tokens: {total_billable_tokens} total ({uncached_input} uncached + "
+                  f"{cached_input_tokens} cached + {output_tokens} output + {reasoning_tokens} reasoning)")
             print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + "
-                  f"${output_token_cost:.6f} output = ${cost:.6f} total")
+                  f"${output_token_cost:.6f} output + ${reasoning_token_cost:.6f} reasoning = ${cost:.6f} total")
             
             results.append({
                 'Run Number': trial_number,
@@ -364,9 +427,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Input Tokens': input_tokens,
                 'Cached Input Tokens': cached_input_tokens,
                 'Output Tokens': output_tokens,
+                'Reasoning Tokens': reasoning_tokens,
                 'Input Token Cost (USD)': round(input_token_cost, 6),
                 'Cached Token Cost (USD)': round(cached_token_cost, 6),
                 'Output Token Cost (USD)': round(output_token_cost, 6),
+                'Reasoning Token Cost (USD)': round(reasoning_token_cost, 6),
                 'Cost (USD)': round(cost, 6)
             })
         except Exception as e:
@@ -380,9 +445,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Input Tokens': None,
                 'Cached Input Tokens': 0,
                 'Output Tokens': None,
+                'Reasoning Tokens': 0,
                 'Input Token Cost (USD)': None,
                 'Cached Token Cost (USD)': None,
                 'Output Token Cost (USD)': None,
+                'Reasoning Token Cost (USD)': None,
                 'Cost (USD)': None
             })
     return results

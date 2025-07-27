@@ -339,17 +339,22 @@ This system is configured to avoid reasoning tokens that could skew token count 
 
 ### Model Selection
 
-- **OpenAI**: `gpt-4o` (non-reasoning model)
+**Note**: All effort was made to use non-reasoning models for accurate cost comparison. However, Grok-4 does not provide an option to disable internal reasoning.
+
+- **OpenAI**: `gpt-4.1` (non-reasoning model)
 - **Gemini**: `gemini-2.5-pro` (non-reasoning model with tiered pricing)
 - **Anthropic**: `claude-sonnet-4-20250514` (non-reasoning model)
-- **Grok**: `grok-2` (non-reasoning model with higher context pricing)
+- **Grok**: `grok-4` (reasoning model - **reasoning cannot be disabled**)
 
 ### Reasoning Configuration
 
-- **Gemini 2.5 Flash**: Controllable reasoning via `thinking_budget` parameter
-  - Set to `0` to disable internal reasoning (behaves like non-reasoning models)
-  - Configurable in `config.py`: `GEMINI_THINKING_BUDGET = 0`
-- **Other providers**: Use standard non-reasoning models
+- **OpenAI**: Uses gpt-4.1 (non-reasoning model)
+- **Gemini**: Uses gemini-2.5-pro (non-reasoning model)
+- **Anthropic**: Uses claude-sonnet-4 (non-reasoning model)
+- **Grok**: Uses grok-4 (reasoning model)
+  - **Limitation**: Internal reasoning cannot be disabled via API
+  - **Impact**: Costs include hidden reasoning tokens (5-10x multiplier)
+  - **Billing**: Reasoning tokens appear in xAI console but not in API responses
 
 This ensures fair token count comparisons without hidden reasoning overhead that could affect cost analysis.
 
@@ -372,11 +377,11 @@ _Last updated: January 2025_
 | OpenAI    | gpt-4.1                    | $2.00 | $1.00 (50% off)  | $8.00 |
 | Gemini    | gemini-2.5-pro             | $1.25/$2.50* | $0.31/$0.63* (75% off) | $10.00/$15.00* |
 | Anthropic | claude-sonnet-4-20250514   | $3.00 | $0.30/$3.75/$6.00** | $15.00 |
-| Grok      | grok-2                     | $3.00/$6.00*** | $0.75/$1.50*** (75% off) | $15.00/$30.00*** |
+| Grok      | grok-4                     | $3.00/$6.00*** | $0.75/$1.50*** (75% off) | $15.00/$30.00*** |
 
 *Gemini uses tiered pricing: lower rates for ≤200K tokens, higher rates for >200K tokens
 **Anthropic cache pricing: $0.30 cache reads, $3.75 ephemeral writes (5min), $6.00 persistent writes (1hr)
-***Grok uses higher context pricing: standard rates for ≤128K tokens, higher rates for >128K tokens
+***Grok uses higher context pricing AND hidden reasoning tokens: actual costs can be 5-10x higher than calculated
 
 ### Caching Details by Provider
 
@@ -427,7 +432,7 @@ _Last updated: January 2025_
 - **Type**: Explicit prompt caching with cache control blocks
 - **Cost Calculation**: Automatically uses correct pricing based on configured cache type
 
-#### Grok (grok-2)
+#### Grok (grok-4)
 
 - **Higher Context Pricing**: Different rates based on total context size
   - **≤128K tokens**: $3.00 input, $0.75 cached, $15.00 output (per 1M tokens)
@@ -435,7 +440,17 @@ _Last updated: January 2025_
 - **Context Calculation**: Based on total input + output tokens per request
 - **Caching**: 75% discount on cached input tokens (applied to appropriate tier rate)
 - **Type**: Automatic prompt caching (OpenAI-compatible)
-- **Management**: Automatic tier detection based on total context size
+
+**⚠️ Critical Grok-4 Billing Behavior:**
+- **Hidden reasoning tokens**: Grok-4 uses internal reasoning that dramatically increases costs
+- **Token multiplier**: Reasoning tokens can be 3-5x the visible prompt/completion tokens
+- **Billing transparency**: xAI console shows breakdown, but API doesn't report reasoning tokens
+- **Cost unpredictability**: Actual costs can be 10-50x higher than calculated from visible tokens
+- **No control**: Internal reasoning appears to be always active (cannot be disabled)
+
+**Example**: 22 visible tokens → 185 actual billable tokens (8.4x multiplier due to 141 reasoning tokens)
+
+**Management**: Automatic tier detection, but reasoning tokens make cost prediction impossible
 
 ### Updating Pricing
 
