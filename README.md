@@ -36,15 +36,53 @@ A system for comparing token usage, costs, and outputs across multiple Large Lan
    pip install -r requirements.txt
    ```
 
-2. **Set up API keys** as environment variables:
+2. **Set up API keys** using a `.env` file (recommended) or environment variables:
 
+   **Option A: Using .env file (Recommended for project isolation)**
    ```bash
+   # Copy the example file
+   cp .env.example .env
+   
+   # Edit .env file with your actual API keys
+   # The .env file is automatically ignored by git
+   ```
 
+   **Option B: Using environment variables**
+   ```bash
    export OPENAI_API_KEY="your-openai-api-key"
    export ANTHROPIC_API_KEY="your-anthropic-api-key"
    export GEMINI_API_KEY="your-gemini-api-key"
    export GROK_API_KEY="your-grok-api-key"
    ```
+
+### API Key Configuration Details
+
+#### .env File Setup (Recommended)
+
+The `.env` file approach is recommended for:
+- **Project isolation** - Keys are specific to this project
+- **Billing validation** - Easier to track usage with dedicated keys
+- **Security** - File is automatically ignored by git
+- **Convenience** - No need to set environment variables each time
+
+**Setup steps:**
+1. Copy `.env.example` to `.env`: `cp .env.example .env`
+2. Edit `.env` with your actual API keys
+3. The application will automatically load keys from `.env` first
+4. Falls back to system environment variables if `.env` not found
+
+**Example .env file:**
+```bash
+OPENAI_API_KEY=sk-proj-abc123...
+ANTHROPIC_API_KEY=sk-ant-api03-xyz789...
+GEMINI_API_KEY=AIzaSyABC123...
+GROK_API_KEY=xai-def456...
+```
+
+#### Key Priority Order
+1. **`.env` file** (highest priority)
+2. **System environment variables** (fallback)
+3. **Default placeholder** (will cause errors)
 
 ### Usage Methods
 

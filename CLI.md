@@ -148,9 +148,19 @@ The tool generates several output files in the `outputs/` directory:
 
 ## Advanced Usage
 
-### Environment Variables
+### API Key Configuration
 
-Set API keys via environment variables:
+**Option 1: .env File (Recommended)**
+
+```bash
+# Copy example file
+cp .env.example .env
+
+# Edit .env with your actual keys
+# File is automatically loaded and ignored by git
+```
+
+**Option 2: Environment Variables**
 
 ```bash
 export OPENAI_API_KEY="your-openai-key"
@@ -161,6 +171,8 @@ export GROK_API_KEY="your-grok-key"
 # Then run normally
 python main.py
 ```
+
+**Key Priority:** .env file → environment variables → config.py fallback
 
 ### Configuration
 
@@ -239,7 +251,7 @@ chmod +x main.py
 | Error | Solution |
 |-------|----------|
 | "Invalid vendor" | Check provider names: openai, gemini, anthropic, grok |
-| "API key missing" | Set environment variables or update config.py |
+| "API key missing" | Set up .env file or environment variables |
 | "Model not found" | Check if model names in config.py are current |
 | "Rate limit exceeded" | Reduce trials or add delays between calls |
 

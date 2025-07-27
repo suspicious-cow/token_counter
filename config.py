@@ -5,13 +5,30 @@ Contains API keys, default settings, and model configurations.
 
 import os
 from datetime import datetime
+from pathlib import Path
+
 try:
     from zoneinfo import ZoneInfo  # Python 3.9+
-
 except ImportError:
     from pytz import timezone as ZoneInfo  # Fallback for older Python
 
-# API Keys - Load from environment variables with fallback to manually entered keys if needed
+# Load environment variables from .env file if it exists
+try:
+    from dotenv import load_dotenv
+    
+    # Look for .env file in the project root
+    env_path = Path(__file__).parent / '.env'
+    if env_path.exists():
+        load_dotenv(env_path)
+        print(f"Loaded environment variables from {env_path}")
+    else:
+        print("No .env file found, using system environment variables")
+        
+except ImportError:
+    print("python-dotenv not installed. Install with: pip install python-dotenv")
+    print("Using system environment variables only")
+
+# API Keys - Load from .env file first, then system environment, then fallback
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "your-openai-api-key")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "your-anthropic-api-key")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "your-gemini-api-key")

@@ -9,3 +9,4 @@ seaborn
 numpy
 rich
 pathlib
+python-dotenv  # For loading .env files
