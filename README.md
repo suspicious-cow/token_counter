@@ -65,6 +65,8 @@ The `.env` file approach is recommended for:
 - **Security** - File is automatically ignored by git
 - **Convenience** - No need to set environment variables each time
 
+**⏰ Billing Data Timing**: Usage and cost data typically appears in provider billing dashboards 24-48 hours after API calls. Use dedicated API keys in your `.env` file for cleaner validation tracking.
+
 **Setup steps:**
 1. Copy `.env.example` to `.env`: `cp .env.example .env`
 2. Edit `.env` with your actual API keys
@@ -456,9 +458,12 @@ total_cost = uncached_input_cost + cached_input_cost + output_cost
 For manual cost verification:
 
 1. Run controlled experiment with a specific verification prompt
-2. Check each vendor's billing dashboard manually
-3. Compare token counts and costs with experiment output
-4. Verify pricing configuration matches actual billing rates
+2. **Wait 24-48 hours** for usage data to appear in billing dashboards
+3. Check each vendor's billing dashboard manually
+4. Compare token counts and costs with experiment output
+5. Verify pricing configuration matches actual billing rates
+
+**⏰ Important**: Billing data can take 1-2 days to appear in provider dashboards after API usage. Plan your validation timeline accordingly.
 
 Check the following dashboards:
 
