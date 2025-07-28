@@ -25,6 +25,15 @@ from clients.anthropic_client import process_with_anthropic, get_model_name as g
 from clients.grok_client import process_with_grok, get_model_name as get_grok_model
 
 
+def format_cost(cost_value):
+    """Format cost value to avoid scientific notation in CSV output"""
+    if cost_value is None:
+        return None
+    # Use Decimal for precise formatting without scientific notation
+    from decimal import Decimal
+    return float(Decimal(f"{cost_value:.8f}"))
+
+
 def calculate_gemini_tiered_cost(input_tokens, cached_tokens, output_tokens):
     """
     Calculate Gemini 2.5 Pro cost using tiered pricing structure.
@@ -305,11 +314,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Cached Input Tokens': cached_input_tokens,
                 'Output Tokens': output_tokens,
                 'Reasoning Tokens': 0,  # OpenAI doesn't use reasoning tokens
-                'Input Token Cost (USD)': round(input_token_cost, 6),
-                'Cached Token Cost (USD)': round(cached_token_cost, 6),
-                'Output Token Cost (USD)': round(output_token_cost, 6),
+                'Input Token Cost (USD)': format_cost(input_token_cost),
+                'Cached Token Cost (USD)': format_cost(cached_token_cost),
+                'Output Token Cost (USD)': format_cost(output_token_cost),
                 'Reasoning Token Cost (USD)': 0.0,  # No reasoning cost for OpenAI
-                'Cost (USD)': round(cost, 6)
+                'Cost (USD)': format_cost(cost)
             })
         except Exception as e:
             results.append({
@@ -368,11 +377,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Cached Input Tokens': cached_input_tokens,
                 'Output Tokens': output_tokens,
                 'Reasoning Tokens': reasoning_tokens,  # Now tracking Gemini reasoning tokens
-                'Input Token Cost (USD)': round(regular_input_cost, 6),
-                'Cached Token Cost (USD)': round(cached_input_cost, 6),
-                'Output Token Cost (USD)': round(output_cost, 6),
-                'Reasoning Token Cost (USD)': round(reasoning_cost, 6),  # Now tracking reasoning cost
-                'Cost (USD)': round(total_cost, 6)
+                'Input Token Cost (USD)': format_cost(regular_input_cost),
+                'Cached Token Cost (USD)': format_cost(cached_input_cost),
+                'Output Token Cost (USD)': format_cost(output_cost),
+                'Reasoning Token Cost (USD)': format_cost(reasoning_cost),  # Now tracking reasoning cost
+                'Cost (USD)': format_cost(total_cost)
             })
         except Exception as e:
             results.append({
@@ -426,11 +435,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Cached Input Tokens': total_cached_tokens,
                 'Output Tokens': output_tokens,
                 'Reasoning Tokens': 0,  # Anthropic doesn't use reasoning tokens
-                'Input Token Cost (USD)': round(regular_input_cost, 6),
-                'Cached Token Cost (USD)': round(cache_creation_cost + cache_read_cost, 6),
-                'Output Token Cost (USD)': round(output_token_cost, 6),
+                'Input Token Cost (USD)': format_cost(regular_input_cost),
+                'Cached Token Cost (USD)': format_cost(cache_creation_cost + cache_read_cost),
+                'Output Token Cost (USD)': format_cost(output_token_cost),
                 'Reasoning Token Cost (USD)': 0.0,  # No reasoning cost for Anthropic
-                'Cost (USD)': round(cost, 6)
+                'Cost (USD)': format_cost(cost)
             })
         except Exception as e:
             results.append({
@@ -485,11 +494,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Cached Input Tokens': cached_input_tokens,
                 'Output Tokens': output_tokens,
                 'Reasoning Tokens': reasoning_tokens,
-                'Input Token Cost (USD)': round(input_token_cost, 6),
-                'Cached Token Cost (USD)': round(cached_token_cost, 6),
-                'Output Token Cost (USD)': round(output_token_cost, 6),
-                'Reasoning Token Cost (USD)': round(reasoning_token_cost, 6),
-                'Cost (USD)': round(cost, 6)
+                'Input Token Cost (USD)': format_cost(input_token_cost),
+                'Cached Token Cost (USD)': format_cost(cached_token_cost),
+                'Output Token Cost (USD)': format_cost(output_token_cost),
+                'Reasoning Token Cost (USD)': format_cost(reasoning_token_cost),
+                'Cost (USD)': format_cost(cost)
             })
         except Exception as e:
             results.append({
@@ -583,7 +592,19 @@ def save_results_to_csv(df, output_path=None):
     if output_path is None:
         output_path = CSV_OUTPUT_PATH
     
-    df.to_csv(output_path, index=False, encoding='utf-8')
+    # Prevent scientific notation in cost columns
+    cost_columns = ['Input Token Cost (USD)', 'Cached Token Cost (USD)', 
+                   'Output Token Cost (USD)', 'Reasoning Token Cost (USD)', 'Cost (USD)']
+    
+    # Format cost columns to avoid scientific notation
+    df_formatted = df.copy()
+    for col in cost_columns:
+        if col in df_formatted.columns:
+            df_formatted[col] = df_formatted[col].apply(
+                lambda x: f"{x:.8f}" if x is not None and isinstance(x, (int, float)) else x
+            )
+    
+    df_formatted.to_csv(output_path, index=False, encoding='utf-8')
     print(f"Raw data saved to {output_path}")
 
 
