@@ -46,12 +46,12 @@ DEFAULT_NUM_TRIALS = 1
 # Last updated: January 2025
 MODELS_INFO = {
     "openai": {
-        "model": "gpt-4.1",  # Latest GPT-4o model (November 2024)
-        "input_cost_per_million": 2.00,    # USD per 1M input tokens (verified from actual billing)
-        "cached_input_cost_per_million": .50, # USD per 1M cached input tokens (50% discount)
-        "output_cost_per_million": 8.00   # USD per 1M output tokens (gpt-4o pricing)
-        # Note: OpenAI automatic prompt caching - 75% discount on cached input tokens (≥1024 tokens)
-        # Caching is automatic for repeated prompt prefixes, no explicit cache management needed
+        "model": "o3-mini",  # o3-mini model with reasoning tokens
+        "input_cost_per_million": 1.25,    # USD per 1M input tokens (o3-mini pricing)
+        "cached_input_cost_per_million": 0.31, # USD per 1M cached input tokens (75% discount)
+        "output_cost_per_million": 5.00   # USD per 1M output tokens (o3-mini pricing)
+        # Note: o3 models include reasoning tokens in completion_tokens_details.reasoning_tokens
+        # Reasoning tokens are charged at the output token rate
     },
     "gemini": {
         "model": "gemini-2.5-pro",  # Gemini 2.5 Pro with tiered pricing

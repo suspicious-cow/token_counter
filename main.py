@@ -283,25 +283,34 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
     vendors = [v.lower() for v in vendors] if vendors else ['openai', 'gemini', 'anthropic', 'grok']
     if 'openai' in vendors:
         try:
-            output, in_tok, cached_in_tok, out_tok = process_with_openai(prompt, system_prompt)
+            output, in_tok, cached_in_tok, out_tok, reasoning_tok = process_with_openai(prompt, system_prompt)
             # Raw token counts - no calculations
             input_tokens = in_tok or 0
             cached_input_tokens = int(cached_in_tok) if cached_in_tok is not None else 0
             output_tokens = out_tok or 0
+            reasoning_tokens = reasoning_tok or 0
             
             # Cost calculation: uncached = total - cached, cached = cached
             uncached_input = max(input_tokens - cached_input_tokens, 0)
             input_token_cost = uncached_input * MODELS_INFO['openai']['input_cost_per_million'] / 1_000_000
             cached_token_cost = cached_input_tokens * MODELS_INFO['openai']['cached_input_cost_per_million'] / 1_000_000
             output_token_cost = output_tokens * MODELS_INFO['openai']['output_cost_per_million'] / 1_000_000
-            cost = input_token_cost + cached_token_cost + output_token_cost
+            reasoning_token_cost = reasoning_tokens * MODELS_INFO['openai']['output_cost_per_million'] / 1_000_000  # Reasoning charged at output rate
+            cost = input_token_cost + cached_token_cost + output_token_cost + reasoning_token_cost
             
             # Display detailed cost breakdown during run
             print(f"  ✅ OpenAI:")
-            print(f"     Tokens: {input_tokens} total in ({uncached_input} uncached + "
-                  f"{cached_input_tokens} cached) + {output_tokens} out")
-            print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + "
-                  f"${output_token_cost:.6f} output = ${cost:.6f} total")
+            if reasoning_tokens > 0:
+                total_billable_tokens = input_tokens + output_tokens + reasoning_tokens
+                print(f"     Tokens: {total_billable_tokens} total ({uncached_input} uncached + "
+                      f"{cached_input_tokens} cached + {output_tokens} output + {reasoning_tokens} reasoning)")
+                print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + "
+                      f"${output_token_cost:.6f} output + ${reasoning_token_cost:.6f} reasoning = ${cost:.6f} total")
+            else:
+                print(f"     Tokens: {input_tokens} total in ({uncached_input} uncached + "
+                      f"{cached_input_tokens} cached) + {output_tokens} out")
+                print(f"     Costs: ${input_token_cost:.6f} uncached + ${cached_token_cost:.6f} cached + "
+                      f"${output_token_cost:.6f} output = ${cost:.6f} total")
             
             results.append({
                 'Run Number': trial_number,
@@ -313,11 +322,11 @@ def run_single_trial(prompt, system_prompt, trial_number, vendors=None):
                 'Input Tokens': input_tokens,
                 'Cached Input Tokens': cached_input_tokens,
                 'Output Tokens': output_tokens,
-                'Reasoning Tokens': 0,  # OpenAI doesn't use reasoning tokens
+                'Reasoning Tokens': reasoning_tokens,  # Now tracking OpenAI reasoning tokens
                 'Input Token Cost (USD)': format_cost(input_token_cost),
                 'Cached Token Cost (USD)': format_cost(cached_token_cost),
                 'Output Token Cost (USD)': format_cost(output_token_cost),
-                'Reasoning Token Cost (USD)': 0.0,  # No reasoning cost for OpenAI
+                'Reasoning Token Cost (USD)': format_cost(reasoning_token_cost),  # Now tracking reasoning cost
                 'Cost (USD)': format_cost(cost)
             })
         except Exception as e:

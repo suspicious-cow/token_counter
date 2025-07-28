@@ -44,7 +44,16 @@ class OpenAIClient(BaseLLMClient):
             else:
                 cached_input_tokens = getattr(prompt_tokens_details, 'cached_tokens', 0) or 0
         
-        return output, input_tokens, cached_input_tokens, output_tokens
+        # Get reasoning tokens if available (for o3 models)
+        reasoning_tokens = 0
+        completion_tokens_details = getattr(response.usage, 'completion_tokens_details', None)
+        if completion_tokens_details:
+            if isinstance(completion_tokens_details, dict):
+                reasoning_tokens = completion_tokens_details.get('reasoning_tokens', 0) or 0
+            else:
+                reasoning_tokens = getattr(completion_tokens_details, 'reasoning_tokens', 0) or 0
+        
+        return output, input_tokens, cached_input_tokens, output_tokens, reasoning_tokens
     
     def get_model_name(self) -> str:
         """Get the default model name for OpenAI"""
@@ -62,11 +71,11 @@ def process_with_openai(prompt, system_prompt, model=None):
         model (str): The model to use (defaults to config setting)
     
     Returns:
-        tuple: (output, input_tokens, cached_input_tokens, output_tokens)
+        tuple: (output, input_tokens, cached_input_tokens, output_tokens, reasoning_tokens)
     """
     client = OpenAIClient()
-    response = client.process(prompt, system_prompt, model)
-    return response.output, response.usage.input_tokens, response.usage.cached_input_tokens, response.usage.output_tokens
+    output, input_tokens, cached_input_tokens, output_tokens, reasoning_tokens = client._make_api_call(prompt, system_prompt, model)
+    return output, input_tokens, cached_input_tokens, output_tokens, reasoning_tokens
 
 
 def get_model_name():
