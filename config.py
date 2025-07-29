@@ -46,7 +46,7 @@ DEFAULT_NUM_TRIALS = 1
 # Last updated: January 2025
 MODELS_INFO = {
     "openai": {
-        "model": "o3-mini",  # o3-mini model with reasoning tokens
+        "model": "o3",  # o3-mini model with reasoning tokens
         "input_cost_per_million": 1.25,    # USD per 1M input tokens (o3-mini pricing)
         "cached_input_cost_per_million": 0.31, # USD per 1M cached input tokens (75% discount)
         "output_cost_per_million": 5.00   # USD per 1M output tokens (o3-mini pricing)
@@ -75,12 +75,12 @@ MODELS_INFO = {
         # UI remains free of charge, API pricing shown above
     },
     "anthropic": {
-        "model": "claude-sonnet-4-20250514",  # Claude Sonnet 4 (May 2025)
+        "model": "claude-sonnet-4-0",  # Claude Sonnet 4 (May 2025)
         "input_cost_per_million": 3.00,    # USD per 1M input tokens
         "output_cost_per_million": 15.00,   # USD per 1M output tokens
         "cache_pricing": {
             "ephemeral": {  # ~5 minute TTL
-                "cache_write_multiplier": 1.25,  # $3.75 per 1M tokens (25% markup: $3.00 * 1.25)
+                "cache_write_multiplier": 3.75,  # Cache in per 1M tokens for 5 min TTL
                 "cache_read_multiplier": 0.10,   # $0.30 per 1M tokens (90% discount: $3.00 * 0.10)
                 "storage_cost_per_million_per_hour": 0.0  # No storage cost for ephemeral
             },
